@@ -1,0 +1,4 @@
+com\mycompany\cardtest\ACR122UReaderHelper.class
+com\mycompany\cardtest\CardTest.class
+com\mycompany\cardtest\exception\CardDataException.class
+com\mycompany\cardtest\util\ACR122Util.class
