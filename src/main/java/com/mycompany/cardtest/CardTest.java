@@ -6,7 +6,13 @@
 package com.mycompany.cardtest;
 
 import com.mycompany.cardtest.util.ACR122Util;
+
 import javax.smartcardio.CardException;
+
+import java.util.HashMap;
+import java.util.Map;
+
+
 public class CardTest {
     public static void main(String []args) throws CardException {
         ACR122UReaderHelper reader = ACR122UReaderHelper.getInstance();
@@ -51,5 +57,22 @@ public class CardTest {
 
         String stringResponse = new String(response);
         System.out.println(stringResponse);
+
+
+        Map<String, String> ticketData = new HashMap<>();
+        ticketData.put("puntoexp", "AQUI");
+        ticketData.put("vendedor", "Isis");
+
+        ticketData.put("idtarjeta", "01");
+
+        ticketData.put("tipotarjeta", "Estudiante" );
+        ticketData.put("telefono", "2299554488");
+        ticketData.put("operacion", "Recarga");
+        ticketData.put("saldoanterior", "10");
+        ticketData.put("saldopagado", "20");
+        ticketData.put("saldocortesia", "10");
+        ticketData.put("recargatotal", "30");
+            new PrintTicket(ticketData);
     }
 }
+
