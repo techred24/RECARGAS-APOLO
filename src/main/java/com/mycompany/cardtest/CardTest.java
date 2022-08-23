@@ -6,6 +6,7 @@
 package com.mycompany.cardtest;
 
 import com.mycompany.cardtest.util.ACR122Util;
+import com.mycompany.cardtest.util.PrintTicket;
 
 import javax.smartcardio.CardException;
 
