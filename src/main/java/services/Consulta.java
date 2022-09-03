@@ -19,7 +19,7 @@ public class Consulta {
     // https://demo.bustrack.mx/apsmg/api/config/tarjeta/lector
     private static String api = "https://demo.bustrack.mx/apsmg/api/";
     private static String token = "";
-    Consulta (String token) {
+    public Consulta (String token) {
         this.token = token;
     }
     /*public static void main(String[] args) throws Exception {
@@ -63,15 +63,28 @@ public class Consulta {
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        short statusCode = (short) response.statusCode();
 
-        // print status code
-        //System.out.println(response.statusCode());
-        // print response body
-        //System.out.println(response.body());
+        try {
+            if (statusCode == 200) {
+                ObjectMapper mapper = new ObjectMapper();
+                Map<Object, Object> data = mapper.readValue(response.body(), Map.class);
+                // print status code
+                //System.out.println(response.statusCode());
+                // print response body
+                //System.out.println(response.body());
 
-        respuesta.put("code", (short)response.statusCode());
-        respuesta.put("data", response.body());
-        return respuesta;
+                respuesta.put("code", (short)response.statusCode());
+                respuesta.put("data", data);
+            } else {
+                respuesta.put("code", (short)response.statusCode());
+            }
+        } catch (Exception e) {
+            respuesta.put("code", (short)response.statusCode());
+            e.printStackTrace();
+        } finally {
+            return respuesta;
+        }
     }
 
     public static Map<Object, Object> sendPost(String consulta, Map<Object, Object> body) throws Exception {
@@ -98,20 +111,24 @@ public class Consulta {
         //System.out.println(response.body());
         short statusCode = (short)response.statusCode();
         //System.out.println(statusCode);
-        ObjectMapper mapper = new ObjectMapper();
         try {
             if (statusCode == 200) {
+                ObjectMapper mapper = new ObjectMapper();
                 Map<Object, Object> data = mapper.readValue(response.body(), Map.class);
                 //Map<Object, Object> another = (Map<Object, Object>) map.get("usuario");
                 //System.out.println(another.get("activo").getClass().getName());
                 respuesta.put("code", (short)response.statusCode());
                 respuesta.put("data", data);
+            } else {
+                respuesta.put("code", (short)response.statusCode());
             }
         } catch (IOException e) {
+            respuesta.put("code", (short)response.statusCode());
             System.out.println("In here. Catch");
             e.printStackTrace();
+        } finally {
+            return respuesta;
         }
-        return respuesta;
     }
 
     private static HttpRequest.BodyPublisher buildFormDataFromMap(Map<Object, Object> data) {
