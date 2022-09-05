@@ -9,7 +9,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>18</maven.compiler.source>
         <maven.compiler.target>18</maven.compiler.target>
-        <exec.mainClass>com.mycompany.cardtest.CardTest</exec.mainClass>
+        <!-- <exec.mainClass>com.mycompany.cardtest.CardTest</exec.mainClass> -->
+        <exec.mainClass>forms.Login</exec.mainClass>
     </properties>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->

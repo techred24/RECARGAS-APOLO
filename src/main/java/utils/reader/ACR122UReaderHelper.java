@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.cardtest;
+package utils.reader;
 
 /**
  *
@@ -24,8 +24,8 @@ import javax.smartcardio.TerminalFactory;
 
 //import com.java.smartcard.acr122u.exception.CardDataException;
 //import com.java.smartcard.acr122u.util.ACR122Util;
-import com.mycompany.cardtest.exception.CardDataException;
-import com.mycompany.cardtest.util.ACR122Util;
+import utils.reader.exception.CardDataException;
+import utils.reader.util.ACR122Util;
 /**
  * 
  * @author Sujith Ramanathan

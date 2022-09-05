@@ -5,6 +5,7 @@
 package forms;
 
 import services.Consulta;
+import utils.CardReader;
 
 import java.util.Map;
 
@@ -33,19 +34,17 @@ public class Recargas extends javax.swing.JFrame {
             final String query = "config/tarjeta/lector";
             Map<Object, Object> configTarjetaResponse = Consulta.sendGet(query);
             configuracionTarjeta = (Map<Object, Object>) configTarjetaResponse.get("data");
-            System.out.println(configuracionTarjeta);
+            //System.out.println(configuracionTarjeta);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void bloquearElementos () {
-        //reporteButton
+    private void bloquearEscritura () {
+        tipoTarjeta.setEnabled(false);
         agregarSaldoButton.setEnabled(false);
-        cerrarTarjetaButton.setEnabled(false);
         guardarButton.setEnabled(false);
-
+        cerrarTarjetaButton.setEnabled(false);
+        reporteButton.setEnabled(false);
         nombre.setEnabled(false);
         apellidoPaterno.setEnabled(false);
         apellidoMaterno.setEnabled(false);
@@ -55,7 +54,6 @@ public class Recargas extends javax.swing.JFrame {
         saldoCortesia.setEnabled(false);
         folio.setEnabled(false);
         id.setEnabled(false);
-        tipoTarjeta.setEnabled(false);
     }
     private void initComponents() {
 
@@ -84,11 +82,16 @@ public class Recargas extends javax.swing.JFrame {
         saldoCortesia = new javax.swing.JTextField();
         folio = new javax.swing.JTextField();
         id = new javax.swing.JTextField();
-        bloquearElementos();
+        bloquearEscritura();
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         leerTarjetaButton.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         leerTarjetaButton.setText("LEER TARJETA");
+        leerTarjetaButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                leerTarjetaButtonActionPerformed(evt);
+            }
+        });
 
         jLabel1.setText("RECARGAS MATACOCUITE");
 
@@ -120,7 +123,6 @@ public class Recargas extends javax.swing.JFrame {
         jLabel10.setText("ID:");
 
         tipoTarjeta.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        //tipoTarjeta.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         agregarSaldoButton.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         agregarSaldoButton.setText("AGREGAR SALDO");
@@ -246,6 +248,17 @@ public class Recargas extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void leerTarjetaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_leerTarjetaButtonActionPerformed
+        try {
+            short bloque = 12;
+            String response = CardReader.read(bloque, configuracionTarjeta);
+            System.out.println(response);
+            //System.out.println("Reading block 12");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_leerTarjetaButtonActionPerformed
 
     /**
      * @param args the command line arguments

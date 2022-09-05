@@ -1,4 +1,4 @@
-package com.mycompany.cardtest.util;
+package utils;
 
 import br.com.adilson.util.Extenso;
 import br.com.adilson.util.PrinterMatrix;

@@ -2,11 +2,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Project/Maven2/JavaApp/src/main/java/${packagePath}/${mainClassName}.java to edit this template
  */
+/*
+package utils.reader;
 
-package com.mycompany.cardtest;
-
-import com.mycompany.cardtest.util.ACR122Util;
-import com.mycompany.cardtest.util.PrintTicket;
+import utils.reader.util.ACR122Util;
+//import utils.reader.util.PrintTicket;
 
 import javax.smartcardio.CardException;
 
@@ -73,7 +73,8 @@ public class CardTest {
         ticketData.put("saldopagado", "20");
         ticketData.put("saldocortesia", "10");
         ticketData.put("recargatotal", "30");
-            new PrintTicket(ticketData);
+            //new PrintTicket(ticketData);
     }
 }
 
+*/
