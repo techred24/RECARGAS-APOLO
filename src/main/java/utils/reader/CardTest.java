@@ -1,8 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Project/Maven2/JavaApp/src/main/java/${packagePath}/${mainClassName}.java to edit this template
- */
-/*
+
 package utils.reader;
 
 import utils.reader.util.ACR122Util;
@@ -50,14 +46,14 @@ public class CardTest {
         reader.connectCard(null);
         reader.getUID(); // Returns UID of the card which is placed on the readert.
         //reader.readCardUsingDefaultKey(1); // Returns 16 bytes of array for success, Returns 2 bytes of array(63,00) for failure
-        byte[] response = reader.readCardBlock(authKeyData, readerUtil.getAuthCmdForkeyA(), 12); // Returns 16 bytes of array for success, Returns 2 bytes of array(63,00) for failure
+        //byte[] response = reader.readCardBlock(authKeyData, readerUtil.getAuthCmdForkeyA(), 12); // Returns 16 bytes of array for success, Returns 2 bytes of array(63,00) for failure
         //byte[] responseOfWriting = reader.writeDataIntoCard(authKeyData, readerUtil.getAuthCmdForkeyA(), 12, data); // Returns 2 bytes of array(90,00) for success, Returns 2 bytes of array(63,00) for failure
 
-        //byte[] responseOfWriting = reader.writeDataIntoCard(authKeyData, readerUtil.getAuthCmdForkeyB(), 15, data);
+        byte[] responseOfWriting = reader.writeDataIntoCard(authKeyData, readerUtil.getAuthCmdForkeyB(), 15, data);
         //byte[] responseReading = reader.readCardBlock();
 
-        String stringResponse = new String(response);
-        System.out.println(stringResponse);
+        //String stringResponse = new String(response);
+        //System.out.println(stringResponse);
 
 
         Map<String, String> ticketData = new HashMap<>();
@@ -76,5 +72,3 @@ public class CardTest {
             //new PrintTicket(ticketData);
     }
 }
-
-*/

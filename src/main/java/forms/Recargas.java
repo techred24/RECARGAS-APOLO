@@ -249,16 +249,34 @@ public class Recargas extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void leerTarjetaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_leerTarjetaButtonActionPerformed
+    private void leerTarjetaButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        short[] bloquesParaAccesar = new short[]{12, 13, 14, 20, 10, 0, 16};
+        String nombre_y_telefono = "";
+
+        String nombre;
+        String apellidoPaterno;
+        String apellidoMaterno;
+        String celular;
+        String saldoDisponible;
+        String folio;
+        String id;
+        String tipoTarjeta;
         try {
-            short bloque = 12;
-            String response = CardReader.read(bloque, configuracionTarjeta);
-            System.out.println(response);
-            //System.out.println("Reading block 12");
+            for (short i = 0; i < bloquesParaAccesar.length; i++) {
+                short bloque = bloquesParaAccesar[i];
+                String response = CardReader.read(bloque, configuracionTarjeta);
+                //CardReader.write(bloque, "2299556644 Wendy", configuracionTarjeta);
+                //System.out.println(response);
+                //System.out.println(response.substring(0,8));
+                //System.out.println("Reading block 12"); 20220407T013812Z
+                if (i <= 2 ) {
+                    nombre_y_telefono += response;
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }//GEN-LAST:event_leerTarjetaButtonActionPerformed
+    }
 
     /**
      * @param args the command line arguments
@@ -295,7 +313,6 @@ public class Recargas extends javax.swing.JFrame {
         });
     }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton agregarSaldoButton;
     private javax.swing.JTextField apellidoMaterno;
     private javax.swing.JTextField apellidoPaterno;
@@ -321,5 +338,5 @@ public class Recargas extends javax.swing.JFrame {
     private javax.swing.JTextField saldoCortesia;
     private javax.swing.JTextField saldoDisponible;
     private javax.swing.JComboBox<String> tipoTarjeta;
-    // End of variables declaration//GEN-END:variables
+
 }
