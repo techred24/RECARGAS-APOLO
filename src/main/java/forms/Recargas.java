@@ -268,21 +268,32 @@ public class Recargas extends javax.swing.JFrame {
                 //CardReader.write(bloque, "2299556644 Wendy", configuracionTarjeta);
                 //System.out.println("Reading block 12"); 20220407T013812Z
 
-                //response = response.substring(0, 16);
+                response = response.substring(0, 16);
                 //System.out.println(response.length());
                 //[\u0068] una h minuscula
-                response = response.replaceAll("\u0000.*","");
+                if (bloquesParaAccesar[i] != 0) {
+                    response = response.replaceAll("\u0000.*","");
+                }
                 //System.out.println(response);
-
                 if (i <= 2 ) {
                     nombre_y_telefono += response;
                 }
                 if (i == 5) {
-                    response = response.substring(0, 8);
+                    String stringToAscii = "";
+                    for (short j = 0; j < response.length(); j++) {
+                        char ch = response.charAt(j);
+                        int in = (int) ch;
+                        String part = Integer.toHexString(in);
+                        stringToAscii += part;
+                    }
+                    response = stringToAscii;
                     System.out.println(response);
-                    System.out.println(response.length());
-                    System.out.println("LOGINTUD DEL BLOQUE 0");
+                    //System.out.println(response.length());
+                    System.out.println("LA RESPUESTA HACIA STRING HEXADECIMAL DESDE RECARGAS");
                 }
+                //System.out.println(response);
+                //System.out.println(response.length());
+                //System.out.println("VALORES DE CADA BLOQUE");
             }
         } catch (Exception e) {
             e.printStackTrace();

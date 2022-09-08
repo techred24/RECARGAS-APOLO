@@ -11,7 +11,12 @@ import java.util.Map;
 public class CardReader {
     private static ACR122UReaderHelper reader = ACR122UReaderHelper.getInstance();
     private static ACR122Util readerUtil = ACR122Util.getInstance();
-
+    public static String byteToHex(byte num) {
+        char[] hexDigits = new char[2];
+        hexDigits[0] = Character.forDigit((num >> 4) & 0xF, 16);
+        hexDigits[1] = Character.forDigit((num & 0xF), 16);
+        return new String(hexDigits);
+    }
     public static String read (short bloque, Map<Object, Object> configuracionTarjeta) throws CardException {
         final int sector = bloque / 4;
         //System.out.println(bloque%4 + " El bloque en el sector del 0 al 3");
@@ -28,15 +33,15 @@ public class CardReader {
         reader.connectReader();
         reader.connectCard(null);
         byte[] response = reader.readCardBlock(authKeyData, readerUtil.getAuthCmdForkeyA(), (int) bloque);
-        String stringResponse = new String(response);
         if (bloque == 0) {
-            stringResponse = "";
-            for (short i = 0; i < response.length; i++) {
-                byte byteIntoString = response[i];
-                String intoString = Byte.toString(byteIntoString);
-                stringResponse += Math.abs(Integer.parseInt(intoString));
+            StringBuffer hexStringBuffer = new StringBuffer();
+            for (short j = 0; j < response.length; j++) {
+                hexStringBuffer.append(byteToHex(response[j]));
             }
+            System.out.println(hexStringBuffer.toString());
+            System.out.println("Hexadecinal String");
         }
+        String stringResponse = new String(response);
         /*System.out.println(new String(response, StandardCharsets.UTF_8));*/
         return stringResponse;
         // Returns 2 bytes of array(63,00) for failure
