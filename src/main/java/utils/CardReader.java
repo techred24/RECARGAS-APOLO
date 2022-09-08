@@ -4,6 +4,7 @@ import utils.reader.ACR122UReaderHelper;
 import utils.reader.util.ACR122Util;
 
 import javax.smartcardio.CardException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -16,13 +17,8 @@ public class CardReader {
         //System.out.println(bloque%4 + " El bloque en el sector del 0 al 3");
         //System.out.println(bloque/4 + " El sector en el que se encuentra el bloque");
         ArrayList<Object> sectores = (ArrayList<Object>) ((Map<Object, Object>) configuracionTarjeta.get("config")).get("sectores");
-        //System.out.println(sectores.size());
-        //System.out.println(sectores.get(3));
         Map<Object, Object> sectorMap = (Map<Object, Object>) sectores.get(sector);
-        //System.out.println(sectorMap.get("keyA"));
-        //System.out.println(sectores.get(3).getClass().getName());
         String keyString = (String) sectorMap.get("keyA");
-        //String keyString = "C9855A4DA3E0";
         int len = keyString.length();
         byte[] authKeyData = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
@@ -33,6 +29,15 @@ public class CardReader {
         reader.connectCard(null);
         byte[] response = reader.readCardBlock(authKeyData, readerUtil.getAuthCmdForkeyA(), (int) bloque);
         String stringResponse = new String(response);
+        if (bloque == 0) {
+            stringResponse = "";
+            for (short i = 0; i < response.length; i++) {
+                byte byteIntoString = response[i];
+                String intoString = Byte.toString(byteIntoString);
+                stringResponse += Math.abs(Integer.parseInt(intoString));
+            }
+        }
+        /*System.out.println(new String(response, StandardCharsets.UTF_8));*/
         return stringResponse;
         // Returns 2 bytes of array(63,00) for failure
     }
@@ -60,5 +65,4 @@ public class CardReader {
         return stringResponse;
         // Returns 2 bytes of array(90,00) for success, Returns 2 bytes of array(63,00) for failure
     }
-
 }
