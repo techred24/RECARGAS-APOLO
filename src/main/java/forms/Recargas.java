@@ -7,6 +7,9 @@ package forms;
 import services.Consulta;
 import utils.CardReader;
 
+import javax.swing.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,12 +23,13 @@ public class Recargas extends javax.swing.JFrame {
      */
     private static Map<Object, Object> userInformation;
     private static  Map<Object, Object> configuracionTarjeta;
+    private String[] tiposTarjeta;
+    private String[] clavesTipoTarjeta;
+    private int indiceClaveTipoTarjeta;
     public Recargas(Map<Object, Object> userData) {
         this.setTitle("Apolo Recargas");
         userInformation = userData;
         new Consulta((String) userInformation.get("token"));
-        //System.out.println(userInformation);
-        //System.out.println(userInformation.get("token"));
         initComponents();
         buscarConfiguracionTarjetas();
     }
@@ -34,7 +38,15 @@ public class Recargas extends javax.swing.JFrame {
             final String query = "config/tarjeta/lector";
             Map<Object, Object> configTarjetaResponse = Consulta.sendGet(query);
             configuracionTarjeta = (Map<Object, Object>) configTarjetaResponse.get("data");
-            //System.out.println(configuracionTarjeta);
+            List subsidios = (List) ((Map<Object, Object>) configuracionTarjeta.get("config")).get("subsidios");
+            tiposTarjeta = new String[subsidios.size()];
+            clavesTipoTarjeta = new String[subsidios.size()];
+            //System.out.println(subsidios.size());
+            //System.out.println("TAMANIO DE LA LISTA DE SUBSIDIOS");
+            for (short i = 0; i < subsidios.size(); i++) {
+                tiposTarjeta[i] =(String) ((Map<Object, Object>) subsidios.get(i)).get("nombre");
+                clavesTipoTarjeta[i] = (String) ((Map<Object, Object>) subsidios.get(i)).get("clave");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -44,7 +56,7 @@ public class Recargas extends javax.swing.JFrame {
         agregarSaldoButton.setEnabled(false);
         guardarButton.setEnabled(false);
         cerrarTarjetaButton.setEnabled(false);
-        reporteButton.setEnabled(false);
+        //reporteButton.setEnabled(false);
         nombre.setEnabled(false);
         apellidoPaterno.setEnabled(false);
         apellidoMaterno.setEnabled(false);
@@ -126,7 +138,11 @@ public class Recargas extends javax.swing.JFrame {
 
         agregarSaldoButton.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         agregarSaldoButton.setText("AGREGAR SALDO");
-
+        agregarSaldoButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                agregarSaldoButtonActionPerformed(evt);
+            }
+        });
         guardarButton.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         guardarButton.setText("GUARDAR");
 
@@ -247,20 +263,16 @@ public class Recargas extends javax.swing.JFrame {
         );
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
-
+    }
+    private void agregarSaldoButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        System.out.println("ADDING PHONE BALANCE");
+    }
     private void leerTarjetaButtonActionPerformed(java.awt.event.ActionEvent evt) {
         short[] bloquesParaAccesar = new short[]{12, 13, 14, 20, 10, 0, 16};
         String nombre_y_telefono = "";
 
-        String nombre;
-        String apellidoPaterno;
-        String apellidoMaterno;
-        String celular;
-        String saldoDisponible;
-        String folio;
+        String soloNombre = "";
         String id;
-        String tipoTarjeta;
         try {
             for (short i = 0; i < bloquesParaAccesar.length; i++) {
                 short bloque = bloquesParaAccesar[i];
@@ -268,41 +280,48 @@ public class Recargas extends javax.swing.JFrame {
                 //CardReader.write(bloque, "2299556644 Wendy", configuracionTarjeta);
                 //System.out.println("Reading block 12"); 20220407T013812Z
 
-                response = response.substring(0, 16);
-                //System.out.println(response.length());
+                if (bloquesParaAccesar[i] != 0) {
+                    response = response.substring(0, 16);
+                }
                 //[\u0068] una h minuscula
                 if (bloquesParaAccesar[i] != 0) {
                     response = response.replaceAll("\u0000.*","");
                 }
-                //System.out.println(response);
                 if (i <= 2 ) {
                     nombre_y_telefono += response;
                 }
-                if (i == 5) {
-                    String stringToAscii = "";
-                    for (short j = 0; j < response.length(); j++) {
-                        char ch = response.charAt(j);
-                        int in = (int) ch;
-                        String part = Integer.toHexString(in);
-                        stringToAscii += part;
-                    }
-                    response = stringToAscii;
-                    System.out.println(response);
-                    //System.out.println(response.length());
-                    System.out.println("LA RESPUESTA HACIA STRING HEXADECIMAL DESDE RECARGAS");
+                if (bloquesParaAccesar[i] == 20) {
+                    this.saldoDisponible.setText(response);
                 }
-                //System.out.println(response);
-                //System.out.println(response.length());
-                //System.out.println("VALORES DE CADA BLOQUE");
+                if (bloquesParaAccesar[i] == 10) {
+                    this.folio.setText(response);
+                }
+                if (bloquesParaAccesar[i] == 16) {
+                    this.tipoTarjeta.setModel(new DefaultComboBoxModel<>(this.tiposTarjeta));
+                    indiceClaveTipoTarjeta = Arrays.asList(clavesTipoTarjeta).indexOf(response);
+                    this.tipoTarjeta.setSelectedIndex(indiceClaveTipoTarjeta);
+                }
+                if (bloquesParaAccesar[i] == 0) {
+
+                }
             }
+            final String[] informacionUsuario = nombre_y_telefono.split(" ");
+            this.celular.setText(informacionUsuario[0]);
+            for (short j = 1; j < informacionUsuario.length-2; j++) {
+                soloNombre += " " + informacionUsuario[j];
+                soloNombre = soloNombre.trim();
+            }
+            this.nombre.setText(soloNombre);
+            this.apellidoPaterno.setText(informacionUsuario[informacionUsuario.length-2]);
+            this.apellidoMaterno.setText(informacionUsuario[informacionUsuario.length-1]);
+
+            this.agregarSaldoButton.setEnabled(true);
+            this.guardarButton.setEnabled(true);
+            this.cerrarTarjetaButton.setEnabled(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">

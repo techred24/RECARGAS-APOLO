@@ -12,6 +12,12 @@ public class CardReader {
     private static ACR122UReaderHelper reader = ACR122UReaderHelper.getInstance();
     private static ACR122Util readerUtil = ACR122Util.getInstance();
     public static String byteToHex(byte num) {
+        /*String tmpHex;
+        tmpHex = Integer.toHexString(((Byte)num).intValue() & 0xFF).toUpperCase();
+        //For single character hex
+        if (tmpHex.length() == 1)  tmpHex = "0" + tmpHex;
+        //tmpStr += " " + tmpHex;
+        System.out.println(tmpHex);*/
         char[] hexDigits = new char[2];
         hexDigits[0] = Character.forDigit((num >> 4) & 0xF, 16);
         hexDigits[1] = Character.forDigit((num & 0xF), 16);
@@ -38,8 +44,9 @@ public class CardReader {
             for (short j = 0; j < response.length; j++) {
                 hexStringBuffer.append(byteToHex(response[j]));
             }
-            System.out.println(hexStringBuffer.toString());
-            System.out.println("Hexadecinal String");
+            //System.out.println(hexStringBuffer.toString().substring(2, 32));
+            //System.out.println(hexStringBuffer.toString().substring(2, 32).length());
+            return hexStringBuffer.toString().substring(2, 32);
         }
         String stringResponse = new String(response);
         /*System.out.println(new String(response, StandardCharsets.UTF_8));*/
