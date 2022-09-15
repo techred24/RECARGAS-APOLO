@@ -8,6 +8,7 @@ import services.Consulta;
 import utils.CardReader;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -263,11 +264,34 @@ public class Recargas extends javax.swing.JFrame {
         );
 
         pack();
-    }
-    private void agregarSaldoButtonActionPerformed(java.awt.event.ActionEvent evt) {
+    }// </editor-fold>//GEN-END:initComponents
+    private void agregarSaldoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_agregarSaldoButtonActionPerformed
         System.out.println("ADDING PHONE BALANCE");
-    }
-    private void leerTarjetaButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        JTextField recargarSaldo = new javax.swing.JTextField();
+        String[] opciones = {"Recargar", "Cancelar"};
+        JPanel basePanel = new JPanel();
+        basePanel.setOpaque(true);
+
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new GridLayout(3, 2, 5, 5));
+
+        centerPanel.setOpaque(true);
+
+
+        JLabel mLabel3 = new JLabel("Ingresar saldo a recargar:");
+        mLabel3.setFont(new java.awt.Font("Segoe UI", 0, 24));
+
+        recargarSaldo.setFont(new java.awt.Font("Segoe UI", 0, 24));
+
+        centerPanel.add(mLabel3);
+        centerPanel.add(recargarSaldo);
+        basePanel.add(centerPanel);
+        JOptionPane.showConfirmDialog(
+                null, basePanel, "Recargar saldo: "
+                , JOptionPane.OK_CANCEL_OPTION
+                , JOptionPane.PLAIN_MESSAGE);
+    }//GEN-LAST:event_agregarSaldoButtonActionPerformed
+    private void leerTarjetaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_leerTarjetaButtonActionPerformed
         short[] bloquesParaAccesar = new short[]{12, 13, 14, 20, 10, 0, 16};
         String nombre_y_telefono = "";
 
@@ -321,7 +345,7 @@ public class Recargas extends javax.swing.JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    }//GEN-LAST:event_leerTarjetaButtonActionPerformed
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
