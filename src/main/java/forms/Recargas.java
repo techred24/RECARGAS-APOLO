@@ -286,10 +286,13 @@ public class Recargas extends javax.swing.JFrame {
         centerPanel.add(mLabel3);
         centerPanel.add(recargarSaldo);
         basePanel.add(centerPanel);
-        JOptionPane.showConfirmDialog(
+        int seleccionada = JOptionPane.showConfirmDialog(
                 null, basePanel, "Recargar saldo: "
                 , JOptionPane.OK_CANCEL_OPTION
                 , JOptionPane.PLAIN_MESSAGE);
+        System.out.println(seleccionada); // zero if for ok and 2 is for cancel in variable seleccionada
+        System.out.println(recargarSaldo.getText());
+        saldoDisponible.setText(recargarSaldo.getText());
     }//GEN-LAST:event_agregarSaldoButtonActionPerformed
     private void leerTarjetaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_leerTarjetaButtonActionPerformed
         short[] bloquesParaAccesar = new short[]{12, 13, 14, 20, 10, 0, 16};
