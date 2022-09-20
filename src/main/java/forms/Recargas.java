@@ -12,6 +12,8 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -57,7 +59,6 @@ public class Recargas extends javax.swing.JFrame {
         agregarSaldoButton.setEnabled(false);
         guardarButton.setEnabled(false);
         cerrarTarjetaButton.setEnabled(false);
-        //reporteButton.setEnabled(false);
         nombre.setEnabled(false);
         apellidoPaterno.setEnabled(false);
         apellidoMaterno.setEnabled(false);
@@ -67,6 +68,18 @@ public class Recargas extends javax.swing.JFrame {
         saldoCortesia.setEnabled(false);
         folio.setEnabled(false);
         id.setEnabled(false);
+    }
+    private void limpiarCampos () {
+        nombre.setText("");
+        apellidoPaterno.setText("");
+        apellidoMaterno.setText("");
+        celular.setText("");
+        saldoDisponible.setText("");
+        saldoAgregar.setText("");
+        saldoCortesia.setText("");
+        folio.setText("");
+        id.setText("");
+        tipoTarjeta.setModel(new DefaultComboBoxModel<>());
     }
     private void initComponents() {
 
@@ -149,6 +162,9 @@ public class Recargas extends javax.swing.JFrame {
 
         cerrarTarjetaButton.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         cerrarTarjetaButton.setText("CERRAR TARJETA");
+        cerrarTarjetaButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) { cerrarTarjetaButtonActionPerformed(evt); }
+        });
 
         reporteButton.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         reporteButton.setText("REPORTE RECARGAS");
@@ -265,34 +281,61 @@ public class Recargas extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+    private  void habilitaDesabilitaBotonesAgregarSaldo () {
+        agregarSaldoButton.setEnabled(!agregarSaldoButton.isEnabled());
+        guardarButton.setEnabled(!guardarButton.isEnabled());
+        cerrarTarjetaButton.setEnabled(!cerrarTarjetaButton.isEnabled());
+    }
+    private void cerrarTarjetaButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        limpiarCampos();
+        habilitaDesabilitaBotonesAgregarSaldo();
+        leerTarjetaButton.setEnabled(true);
+    }
     private void agregarSaldoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_agregarSaldoButtonActionPerformed
-        System.out.println("ADDING PHONE BALANCE");
-        JTextField recargarSaldo = new javax.swing.JTextField();
+        //System.out.println("ADDING PHONE BALANCE");
+        JTextField recargarSaldoTextField = new javax.swing.JTextField();
+        JTextField saldoCortesiaTextField = new javax.swing.JTextField();
         String[] opciones = {"Recargar", "Cancelar"};
         JPanel basePanel = new JPanel();
         basePanel.setOpaque(true);
 
         JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new GridLayout(3, 2, 5, 5));
+        centerPanel.setLayout(new GridLayout(5, 2, 5, 5));
 
         centerPanel.setOpaque(true);
 
 
-        JLabel mLabel3 = new JLabel("Ingresar saldo a recargar:");
-        mLabel3.setFont(new java.awt.Font("Segoe UI", 0, 24));
+        JLabel recargarSaldoLabel = new JLabel("Ingresar saldo a recargar:");
+        recargarSaldoLabel.setFont(new java.awt.Font("Segoe UI", 0, 24));
 
-        recargarSaldo.setFont(new java.awt.Font("Segoe UI", 0, 24));
+        JLabel saldoCortesiaLabel = new JLabel("Ingresar saldo de cortesia:");
+        saldoCortesiaLabel.setFont(new java.awt.Font("Segoe UI", 0, 24));
 
-        centerPanel.add(mLabel3);
-        centerPanel.add(recargarSaldo);
+        recargarSaldoTextField.setFont(new java.awt.Font("Segoe UI", 0, 24));
+        saldoCortesiaTextField.setFont(new java.awt.Font("Segoe UI",0,24));
+
+        centerPanel.add(recargarSaldoLabel);
+        centerPanel.add(recargarSaldoTextField);
+        centerPanel.add(saldoCortesiaLabel);
+        centerPanel.add(saldoCortesiaTextField);
         basePanel.add(centerPanel);
         int seleccionada = JOptionPane.showConfirmDialog(
                 null, basePanel, "Recargar saldo: "
                 , JOptionPane.OK_CANCEL_OPTION
                 , JOptionPane.PLAIN_MESSAGE);
-        System.out.println(seleccionada); // zero if for ok and 2 is for cancel in variable seleccionada
-        System.out.println(recargarSaldo.getText());
-        saldoDisponible.setText(recargarSaldo.getText());
+        System.out.println(seleccionada + " Seleccionada"); // zero if for ok and 2 is for cancel in variable seleccionada
+        if (seleccionada == JOptionPane.OK_OPTION) {
+            final String numericRegEx = "^[0-9]+([.][0-9]+)?$";
+            final Pattern pattern = Pattern.compile(numericRegEx);
+            final Matcher recargarSaldoRegExMatcher = pattern.matcher(recargarSaldoTextField.getText());
+            final Matcher saldoCortesiaRegExMatcher = pattern.matcher(saldoCortesiaTextField.getText());
+            if (recargarSaldoRegExMatcher.matches()) {
+                saldoAgregar.setText(recargarSaldoTextField.getText());
+            }
+            if (saldoCortesiaRegExMatcher.matches()) {
+                saldoCortesia.setText(saldoCortesiaTextField.getText());
+            }
+        }
     }//GEN-LAST:event_agregarSaldoButtonActionPerformed
     private void leerTarjetaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_leerTarjetaButtonActionPerformed
         short[] bloquesParaAccesar = new short[]{12, 13, 14, 20, 10, 0, 16};
@@ -342,9 +385,8 @@ public class Recargas extends javax.swing.JFrame {
             this.apellidoPaterno.setText(informacionUsuario[informacionUsuario.length-2]);
             this.apellidoMaterno.setText(informacionUsuario[informacionUsuario.length-1]);
 
-            this.agregarSaldoButton.setEnabled(true);
-            this.guardarButton.setEnabled(true);
-            this.cerrarTarjetaButton.setEnabled(true);
+            habilitaDesabilitaBotonesAgregarSaldo();
+            this.leerTarjetaButton.setEnabled(false);
         } catch (Exception e) {
             e.printStackTrace();
         }

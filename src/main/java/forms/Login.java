@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import services.Consulta;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -111,9 +112,11 @@ public class Login extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null,"Error al intentar hacer login");
                 return;
             }
-            //System.out.println(loginResponse);
-            //System.out.println(loginResponse.get("data"));
             Recargas recargas = new Recargas((Map<Object, Object>) loginResponse.get("data"));
+            Toolkit screen = Toolkit.getDefaultToolkit();
+            Dimension screenSize = screen.getScreenSize();
+            int screenWidth = screenSize.width;
+            recargas.setLocation((screenWidth-recargas.getSize().width)/2, 0);
             recargas.setVisible(true);
             this.dispose();
         } catch (Exception e) {
@@ -151,7 +154,14 @@ public class Login extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Login().setVisible(true);
+                JFrame login = new Login();
+                login.setVisible(true);
+                //System.out.println(login.getSize());
+                Toolkit screen = Toolkit.getDefaultToolkit();
+                Dimension screenSize = screen.getScreenSize();
+                int screenHeight = screenSize.height;
+                int screenWidth = screenSize.width;
+                login.setLocation((screenWidth-login.getSize().width)/2, (screenHeight-login.getSize().height)/2);
             }
         });
     }
