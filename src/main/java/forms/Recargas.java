@@ -159,7 +159,9 @@ public class Recargas extends javax.swing.JFrame {
         });
         guardarButton.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         guardarButton.setText("GUARDAR");
-
+        guardarButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) { guardarButtonActionPerformed(evt); }
+        });
         cerrarTarjetaButton.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         cerrarTarjetaButton.setText("CERRAR TARJETA");
         cerrarTarjetaButton.addActionListener(new java.awt.event.ActionListener() {
@@ -286,13 +288,34 @@ public class Recargas extends javax.swing.JFrame {
         guardarButton.setEnabled(!guardarButton.isEnabled());
         cerrarTarjetaButton.setEnabled(!cerrarTarjetaButton.isEnabled());
     }
+    private void activarTarjeta () {
+
+    }
+    private void  recargarTarjeta () {
+        final String numericRegeX = "^[0-9]+([.][0-9]+)?$";
+        final Pattern pattern = Pattern.compile(numericRegeX);
+        final Matcher agregarSaldoMatcher = pattern.matcher(saldoAgregar.getText());
+        if (saldoAgregar.getText().isBlank() || saldoAgregar.getText().equals("0")) {
+            JOptionPane.showMessageDialog(null,"NO SE HA AGREGADO SALDO A LA TARJETA");
+        }
+        if (!agregarSaldoMatcher.matches()) {
+                JOptionPane.showMessageDialog(null,  "SALDO CORTESIA NO VALIDO");
+        }
+    }
+    private void guardarButtonActionPerformed (java.awt.event.ActionEvent evt) {
+        System.out.println(nombre.isEnabled() + " <- Text Field nombre habilitado, tarjeta nueva");
+        if (nombre.isEnabled()) {
+            activarTarjeta();
+            return;
+        }
+        recargarTarjeta();
+    }
     private void cerrarTarjetaButtonActionPerformed(java.awt.event.ActionEvent evt) {
         limpiarCampos();
         habilitaDesabilitaBotonesAgregarSaldo();
         leerTarjetaButton.setEnabled(true);
     }
     private void agregarSaldoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_agregarSaldoButtonActionPerformed
-        //System.out.println("ADDING PHONE BALANCE");
         JTextField recargarSaldoTextField = new javax.swing.JTextField();
         JTextField saldoCortesiaTextField = new javax.swing.JTextField();
         String[] opciones = {"Recargar", "Cancelar"};
