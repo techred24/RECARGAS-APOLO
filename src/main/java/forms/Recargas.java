@@ -9,9 +9,12 @@ import utils.CardReader;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -295,11 +298,59 @@ public class Recargas extends javax.swing.JFrame {
         final String numericRegeX = "^[0-9]+([.][0-9]+)?$";
         final Pattern pattern = Pattern.compile(numericRegeX);
         final Matcher agregarSaldoMatcher = pattern.matcher(saldoAgregar.getText());
+        final Matcher cortesiaSaldoMatcher = pattern.matcher(saldoCortesia.getText());
         if (saldoAgregar.getText().isBlank() || saldoAgregar.getText().equals("0")) {
-            JOptionPane.showMessageDialog(null,"NO SE HA AGREGADO SALDO A LA TARJETA");
+            JOptionPane.showMessageDialog(null, "NO SE HA AGREGADO SALDO A LA TARJETA");
+            return;
         }
         if (!agregarSaldoMatcher.matches()) {
-                JOptionPane.showMessageDialog(null,  "SALDO CORTESIA NO VALIDO");
+            JOptionPane.showMessageDialog(null, "SALDO A AGREGAR NO VALIDO");
+            return;
+        }
+        if (saldoCortesia.getText().isBlank()) {
+            saldoCortesia.setText("0");
+        }
+        InetAddress localMachine = null;
+        try {
+            localMachine = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        String idUsuario = (String) ((Map<Object, Object>) userInformation.get("usuario")).get("_id");
+        System.out.println(userInformation.get("usuario"));
+        System.out.println(idUsuario + " LA INFORMACION DEL USUARIO");
+        try {
+            System.out.println(CardReader.read((short) 1, configuracionTarjeta));
+            System.out.println("Leyendo bloque 1");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        final Date date = new Date();
+        Map body = new HashMap();
+        float saldoActualizado = Float.parseFloat(saldoAgregar.getText()) + Float.parseFloat(saldoDisponible.getText()) + Float.parseFloat(saldoCortesia.getText());
+        body.put("saldo", saldoActualizado);
+        body.put("saldocortesia", saldoCortesia.getText());
+        body.put("fechaaltaLector", dateFormat.format(date));
+        body.put("usuario", idUsuario);
+        body.put("usuarioPc", System.getProperty("user.name"));
+        body.put("tarjeta", ""); // La info viene en el Bloque 1 de la tarjeta pero varia con el programa actual
+        body.put("idMaquina", localMachine.getHostName());
+        String saldoActualizadoString = Float.toString(saldoActualizado);
+        System.out.println(saldoActualizadoString.length() + " <-- LA LONGITUD DEL STRING SALDO");
+        for (int i = saldoActualizadoString.length() - 1; i < 16; i++) {
+            saldoActualizadoString += " ";
+        }
+        System.out.println();
+        try {
+            //Consulta.sendPost("recarga", body);
+            String response = CardReader.write((short) 20, Float.toString(saldoActualizado), configuracionTarjeta);
+            System.out.println(response + " <-- RESPUESTA DE LA ESCRITURA");
+            String responseReader = CardReader.read((short) 20, configuracionTarjeta);
+            System.out.println(responseReader + " <-- LA RESPUESTA DE LA LECTURA");
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
     private void guardarButtonActionPerformed (java.awt.event.ActionEvent evt) {
