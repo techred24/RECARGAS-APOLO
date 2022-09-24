@@ -32,16 +32,24 @@ public class Recargas extends javax.swing.JFrame {
     private String[] tiposTarjeta;
     private String[] clavesTipoTarjeta;
     private int indiceClaveTipoTarjeta;
-    public Recargas(Map<Object, Object> userData) {
+    public Recargas() {
         this.setTitle("Apolo Recargas");
-        userInformation = userData;
-        new Consulta((String) userInformation.get("token"));
+        //userInformation = userData;
+        //new Consulta((String) userInformation.get("token"));
         initComponents();
-        buscarConfiguracionTarjetas();
+        final String query = "configuraciontarjetas/pc";
+        try {
+            Map<Object, Object> configTarjetaResponse = Consulta.sendGet(query);
+            System.out.println(configTarjetaResponse + "<<--------RESPUESTA");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //buscarConfiguracionTarjetas();
     }
     private void buscarConfiguracionTarjetas() {
         try {
-            final String query = "config/tarjeta/lector";
+            //final String query = "config/tarjeta/lector";
+            final String query = "configuraciontarjetas/pc";
             Map<Object, Object> configTarjetaResponse = Consulta.sendGet(query);
             configuracionTarjeta = (Map<Object, Object>) configTarjetaResponse.get("data");
             List subsidios = (List) ((Map<Object, Object>) configuracionTarjeta.get("config")).get("subsidios");

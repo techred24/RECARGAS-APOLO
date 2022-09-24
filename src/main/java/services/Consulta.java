@@ -17,7 +17,8 @@ import java.nio.charset.StandardCharsets;
 
 public class Consulta {
     // https://demo.bustrack.mx/apsmg/api/config/tarjeta/lector
-    private static String api = "https://demo.bustrack.mx/apsmg/api/";
+    //private static String api = "https://demo.bustrack.mx/apsmg/api/";
+    private static String api = "http://localhost:4000/api/";
     private static String token = "";
     public Consulta (String token) {
         this.token = token;
@@ -87,19 +88,21 @@ public class Consulta {
         }
     }
 
-    public static Map<Object, Object> sendPost(String consulta, Map<Object, Object> body) throws Exception {
+    public static Map<Object, Object> sendPost(String consulta, Map<String, Object> body) throws Exception {
         Map<Object, Object> respuesta = new HashMap<>();
         final String url = api + consulta ;
         final HttpClient httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_2)
                 .build();
 
+        String json = new ObjectMapper().writeValueAsString(body);
         HttpRequest request = HttpRequest.newBuilder()
-                .POST(buildFormDataFromMap(body))
+                //.POST(buildFormDataFromMap(body))
+                .POST(HttpRequest.BodyPublishers.ofString(json))
                 .uri(URI.create(url))
                 //.setHeader("User-Agent", "Java 11 HttpClient Bot") // add request header
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                //.header("content-type", "application/json")
+                //.header("Content-Type", "application/x-www-form-urlencoded")
+                .header("content-type", "application/json")
                 .header("authorization", "Bearer " + token)
                 .build();
 
@@ -131,7 +134,7 @@ public class Consulta {
         }
     }
 
-    private static HttpRequest.BodyPublisher buildFormDataFromMap(Map<Object, Object> data) {
+    /*private static HttpRequest.BodyPublisher buildFormDataFromMap(Map<Object, Object> data) {
         var builder = new StringBuilder();
         for (Map.Entry<Object, Object> entry : data.entrySet()) {
             if (builder.length() > 0) {
@@ -143,5 +146,5 @@ public class Consulta {
         }
         //System.out.println(builder.toString());
         return HttpRequest.BodyPublishers.ofString(builder.toString());
-    }
+    }*/
 }

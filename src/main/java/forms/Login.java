@@ -102,17 +102,29 @@ public class Login extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         try {
-            Map<Object, Object> data = new HashMap<>();
+            Map<String, Object> data = new HashMap<>();
             data.put("usuario", usuario.getText());
             data.put("contrasena", String.valueOf(claveAcceso.getPassword()));
 
-            Map<Object, Object> loginResponse = Consulta.sendPost("usuario/loginV2/", data);
-            boolean successfulLogin = (boolean) ((Map<Object, Object>) loginResponse.get("data")).get("success");
-            if (!successfulLogin) {
+            //Map<Object, Object> loginResponse = Consulta.sendPost("usuario/loginV2/", data);
+            Map<Object, Object> loginResponse = Consulta.sendPost("session/login", data);
+            if ((short) loginResponse.get("code") != 200) {
                 JOptionPane.showMessageDialog(null,"Error al intentar hacer login");
                 return;
             }
-            Recargas recargas = new Recargas((Map<Object, Object>) loginResponse.get("data"));
+            //Map<Object, Object> configTarjetasResponse = Consulta.sendGet("configuraciontarjetas/pc");
+            //System.out.println(configTarjetasResponse + "     <------");
+
+            /*boolean successfulLogin = (boolean) ((Map<Object, Object>) loginResponse.get("data")).get("success");
+            if (!successfulLogin) {
+                JOptionPane.showMessageDialog(null,"Error al intentar hacer login");
+                return;
+            }*/
+            Map<Object, Object> userData = (Map<Object, Object>) (((Map<Object, Object>) loginResponse.get("data")).get("data"));
+            System.out.println((String) userData.get("token"));
+            new Consulta((String) userData.get("token"));
+            //System.out.println(userData.get("token") + "  <--- USER DATA");
+            Recargas recargas = new Recargas();
             Toolkit screen = Toolkit.getDefaultToolkit();
             Dimension screenSize = screen.getScreenSize();
             int screenWidth = screenSize.width;
