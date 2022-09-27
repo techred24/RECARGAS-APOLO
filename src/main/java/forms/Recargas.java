@@ -9,6 +9,7 @@ import utils.CardReader;
 import utils.PrintTicket;
 
 import javax.smartcardio.Card;
+import javax.smartcardio.CardException;
 import javax.swing.*;
 import java.awt.*;
 import java.net.InetAddress;
@@ -36,6 +37,7 @@ public class Recargas extends javax.swing.JFrame {
     private String[] tiposTarjeta;
     private String[] clavesTipoTarjeta;
     private int indiceClaveTipoTarjeta;
+    private static String UID_Tarjeta = "";
     public Recargas(Map<Object,Object> userData) {
         this.setTitle("Apolo Recargas");
         userInformation = userData;
@@ -45,7 +47,6 @@ public class Recargas extends javax.swing.JFrame {
         buscarConfiguracionTarjetas();
     }
     private void buscarConfiguracionTarjetas() {
-        System.out.println("INSIDE");
         try {
             //final String query = "config/tarjeta/lector";
             final String query = "configuraciontarjetas/pc";
@@ -58,7 +59,7 @@ public class Recargas extends javax.swing.JFrame {
             //System.out.println(configTarjetaResponse + "LA RESPUESTA");
             dataConfiguracionTarjeta = (Map<Object, Object>) configTarjetaResponse.get("data");
             configuracionTarjeta = (Map<Object, Object>) dataConfiguracionTarjeta.get("data");
-            System.out.println(configuracionTarjeta + " <------ CONFIGURACION TARJETA");
+            //System.out.println(configuracionTarjeta + " <------ CONFIGURACION TARJETA");
             sectores = (ArrayList<Object>) configuracionTarjeta.get("sectores");
             //System.out.println(configuracionTarjeta.get("subsidios"));
 
@@ -317,7 +318,7 @@ public class Recargas extends javax.swing.JFrame {
         final String numericRegeX = "^[0-9]+([.][0-9]+)?$";
         final Pattern pattern = Pattern.compile(numericRegeX);
         final Matcher agregarSaldoMatcher = pattern.matcher(saldoAgregar.getText());
-        final Matcher cortesiaSaldoMatcher = pattern.matcher(saldoCortesia.getText());
+        //final Matcher cortesiaSaldoMatcher = pattern.matcher(saldoCortesia.getText());
         if (saldoAgregar.getText().isBlank() || saldoAgregar.getText().equals("0")) {
             JOptionPane.showMessageDialog(null, "NO SE HA AGREGADO SALDO A LA TARJETA");
             return;
@@ -335,21 +336,11 @@ public class Recargas extends javax.swing.JFrame {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-        System.out.println(userInformation.get("usuario") + " <------------ EL USUARIO");
+        //System.out.println(userInformation.get("usuario") + " <------------ EL USUARIO");
         String idUsuario = (String) ((Map<Object, Object>) userInformation.get("usuario")).get("_id");
-        //System.out.println(userInformation.get("usuario"));
-        System.out.println(idUsuario + " LA INFORMACION DEL USUARIO");
+        String idTarjeta = "";
         try {
-            String idTarjeta1 = CardReader.read((short) 1, sectores);
-            String idTarjeta2 = CardReader.read((short) 2, sectores);
-            System.out.println(idTarjeta1 + "  <<<---- EL ID 1");
-            System.out.println(idTarjeta2 + "  <<<---- EL ID 2");
-            idTarjeta1 = idTarjeta1.substring(0,16);
-            idTarjeta2 = idTarjeta2.substring(0,16);
-            String idTarjeta = idTarjeta1 + idTarjeta2;
-            idTarjeta = idTarjeta.replaceAll("\u0000.*","");
-            System.out.println(idTarjeta + "  <<<---- EL ID DE LA TARJETA");
-            System.out.println("Leyendo bloque 1");
+            idTarjeta = consigueIdTarjeta();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -357,21 +348,13 @@ public class Recargas extends javax.swing.JFrame {
         final Date date = new Date();
         Map body = new HashMap();
         float saldoActualizado = Float.parseFloat(saldoAgregar.getText()) + Float.parseFloat(saldoDisponible.getText()) + Float.parseFloat(saldoCortesia.getText());
-        try {
-            String res = CardReader.read((short) 1, sectores);
-            System.out.println(res + " <<--- RESPONSE");
-            if (res.length() > 0) {
-                return;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
         body.put("saldo", saldoActualizado);
         body.put("saldocortesia", saldoCortesia.getText());
         body.put("fechaaltaLector", dateFormat.format(date));
         body.put("usuario", idUsuario);
         body.put("usuarioPc", System.getProperty("user.name"));
-        body.put("tarjeta", ""); // La info viene en el Bloque 1 de la tarjeta pero varia con el programa actual
+        body.put("tarjeta", idTarjeta); // La info viene en el Bloque 1 de la tarjeta pero varia con el programa actual
         body.put("idMaquina", localMachine.getHostName());
         String saldoActualizadoString = Float.toString(saldoActualizado);
         System.out.println(saldoActualizadoString.length() + " <-- LA LONGITUD DEL STRING SALDO");
@@ -379,30 +362,32 @@ public class Recargas extends javax.swing.JFrame {
             saldoActualizadoString += " ";
             //System.out.println(saldoActualizadoString.length() + " <---- LONGITUD EN LOOP");
         }
-        //System.out.println(saldoActualizadoString.length() + " <------- La longitud del string a escribir");
         try {
             Map<Object,Object> respuesta = Consulta.sendPost("recargasaldo/", body);
-            System.out.println(respuesta + " <-------- LA RESPUESTA DEL SERVIDOR");
-            String response = CardReader.write((short) 20, saldoActualizadoString, sectores);
-            String responseReader = CardReader.read((short) 20, sectores);
-            System.out.println(responseReader + " <-- LA RESPUESTA DE LA LECTURA");
-            //float saldoParaCortesia = Float.parseFloat(cortesiaField.getText());
-            //float saldoPagadoOperacion = Float.parseFloat(saldoAgregar.getText()) - Float.parseFloat(saldoCortesia.getText());
-            String saldoPagado = saldoAgregar.getText();
+            //System.out.println(respuesta + " <-------- LA RESPUESTA DEL SERVIDOR");
+            CardReader.write((short) 20, saldoActualizadoString, sectores);
+            //String responseReader = CardReader.read((short) 20, sectores);
+            //System.out.println(responseReader + " <-- LA RESPUESTA DE LA LECTURA. SALDO ACTUALIZADO");
+            String saldoPagado = String.valueOf(Float.parseFloat(saldoAgregar.getText()));
+            String saldoCortesiaImpresion = String.valueOf(Float.parseFloat(saldoCortesia.getText()));
             float recargaTotal = Float.parseFloat(saldoCortesia.getText()) + Float.parseFloat(saldoAgregar.getText());
             String nombreUsuario = (String) ((Map<Object,Object>) userInformation.get("usuario")).get("nombre");
-            //System.out.println(userInformation + "   <<<------ EL NOMBRE DE USUARIO");
-            //Map<String, String> ticketData = new HashMap<>();
+            String folio_idFabrica = folio.getText();
+            if (folio_idFabrica.isBlank()) {
+                folio_idFabrica += UID_Tarjeta;
+            } else {
+                folio_idFabrica = folio_idFabrica + " / " + UID_Tarjeta;
+            }
             Map<String, String> ticketData = new HashMap<>();
             ticketData.put("puntoexp", localMachine.getHostName());
             ticketData.put("vendedor", nombreUsuario);
-            ticketData.put("idtarjeta", "---");
+            ticketData.put("idtarjeta", folio_idFabrica);
             ticketData.put("tipotarjeta",  tipoTarjeta.getSelectedItem().toString());
             ticketData.put("telefono", celular.getText());
             ticketData.put("operacion", "RECARGA");
             ticketData.put("saldoanterior", saldoDisponible.getText());
             ticketData.put("saldopagado", saldoPagado);
-            ticketData.put("saldocortesia", saldoCortesia.getText());
+            ticketData.put("saldocortesia", saldoCortesiaImpresion);
             ticketData.put("recargatotal", String.valueOf(recargaTotal));
             new PrintTicket(ticketData);
             cerrarTarjetaButtonActionPerformed();
@@ -468,12 +453,31 @@ public class Recargas extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_agregarSaldoButtonActionPerformed
+
+    private String consigueIdTarjeta () throws CardException {
+        String idTarjeta1 = CardReader.read((short) 1, sectores);
+        String idTarjeta2 = CardReader.read((short) 2, sectores);
+        idTarjeta1 = idTarjeta1.substring(0,16);
+        idTarjeta2 = idTarjeta2.substring(0,16);
+        String idTarjeta = idTarjeta1 + idTarjeta2;
+        idTarjeta = idTarjeta.replaceAll("\u0000.*","");
+        return idTarjeta;
+    }
     private void leerTarjetaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_leerTarjetaButtonActionPerformed
+        try {
+            String idTarjeta = consigueIdTarjeta();
+            Map<Object, Object> response = Consulta.sendGet("tarjeta/getIdFabrica/" + idTarjeta);
+            System.out.println(response + " <<<----- LA RESPUESTA DEL SERVIDOR");
+            //  EL FAKE UID
+            UID_Tarjeta = "51643412";
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         short[] bloquesParaAccesar = new short[]{12, 13, 14, 20, 10, 0, 16};
         String nombre_y_telefono = "";
 
         String soloNombre = "";
-        String id;
+        //String id;
         try {
             for (short i = 0; i < bloquesParaAccesar.length; i++) {
                 short bloque = bloquesParaAccesar[i];
