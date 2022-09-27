@@ -6,7 +6,9 @@ package forms;
 
 import services.Consulta;
 import utils.CardReader;
+import utils.PrintTicket;
 
+import javax.smartcardio.Card;
 import javax.swing.*;
 import java.awt.*;
 import java.net.InetAddress;
@@ -28,31 +30,40 @@ public class Recargas extends javax.swing.JFrame {
      * Creates new form Recargas
      */
     private static Map<Object, Object> userInformation;
-    private static  Map<Object, Object> configuracionTarjeta;
+    private static  Map<Object, Object> dataConfiguracionTarjeta;
+    private static Map<Object, Object> configuracionTarjeta;
+    private ArrayList<Object> sectores;
     private String[] tiposTarjeta;
     private String[] clavesTipoTarjeta;
     private int indiceClaveTipoTarjeta;
-    public Recargas() {
+    public Recargas(Map<Object,Object> userData) {
         this.setTitle("Apolo Recargas");
-        //userInformation = userData;
+        userInformation = userData;
         //new Consulta((String) userInformation.get("token"));
         initComponents();
         final String query = "configuraciontarjetas/pc";
-        try {
-            Map<Object, Object> configTarjetaResponse = Consulta.sendGet(query);
-            System.out.println(configTarjetaResponse + "<<--------RESPUESTA");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        //buscarConfiguracionTarjetas();
+        buscarConfiguracionTarjetas();
     }
     private void buscarConfiguracionTarjetas() {
+        System.out.println("INSIDE");
         try {
             //final String query = "config/tarjeta/lector";
             final String query = "configuraciontarjetas/pc";
             Map<Object, Object> configTarjetaResponse = Consulta.sendGet(query);
-            configuracionTarjeta = (Map<Object, Object>) configTarjetaResponse.get("data");
-            List subsidios = (List) ((Map<Object, Object>) configuracionTarjeta.get("config")).get("subsidios");
+            /*if ((int) configTarjetaResponse.get("code") != 200) {
+                JOptionPane.showMessageDialog(null, "Algo salio mal");
+                this.dispose();
+                return;
+            }*/
+            //System.out.println(configTarjetaResponse + "LA RESPUESTA");
+            dataConfiguracionTarjeta = (Map<Object, Object>) configTarjetaResponse.get("data");
+            configuracionTarjeta = (Map<Object, Object>) dataConfiguracionTarjeta.get("data");
+            System.out.println(configuracionTarjeta + " <------ CONFIGURACION TARJETA");
+            sectores = (ArrayList<Object>) configuracionTarjeta.get("sectores");
+            //System.out.println(configuracionTarjeta.get("subsidios"));
+
+            List subsidios = (List) configuracionTarjeta.get("subsidios");
+            //System.out.println(subsidios + " <------- SUBSIDIOS");
             tiposTarjeta = new String[subsidios.size()];
             clavesTipoTarjeta = new String[subsidios.size()];
             //System.out.println(subsidios.size());
@@ -165,7 +176,7 @@ public class Recargas extends javax.swing.JFrame {
         agregarSaldoButton.setText("AGREGAR SALDO");
         agregarSaldoButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                agregarSaldoButtonActionPerformed(evt);
+                agregarSaldoButtonActionPerformed();
             }
         });
         guardarButton.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
@@ -176,7 +187,7 @@ public class Recargas extends javax.swing.JFrame {
         cerrarTarjetaButton.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         cerrarTarjetaButton.setText("CERRAR TARJETA");
         cerrarTarjetaButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) { cerrarTarjetaButtonActionPerformed(evt); }
+            public void actionPerformed(java.awt.event.ActionEvent evt) { cerrarTarjetaButtonActionPerformed(); }
         });
 
         reporteButton.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
@@ -324,11 +335,20 @@ public class Recargas extends javax.swing.JFrame {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
+        System.out.println(userInformation.get("usuario") + " <------------ EL USUARIO");
         String idUsuario = (String) ((Map<Object, Object>) userInformation.get("usuario")).get("_id");
-        System.out.println(userInformation.get("usuario"));
+        //System.out.println(userInformation.get("usuario"));
         System.out.println(idUsuario + " LA INFORMACION DEL USUARIO");
         try {
-            System.out.println(CardReader.read((short) 1, configuracionTarjeta));
+            String idTarjeta1 = CardReader.read((short) 1, sectores);
+            String idTarjeta2 = CardReader.read((short) 2, sectores);
+            System.out.println(idTarjeta1 + "  <<<---- EL ID 1");
+            System.out.println(idTarjeta2 + "  <<<---- EL ID 2");
+            idTarjeta1 = idTarjeta1.substring(0,16);
+            idTarjeta2 = idTarjeta2.substring(0,16);
+            String idTarjeta = idTarjeta1 + idTarjeta2;
+            idTarjeta = idTarjeta.replaceAll("\u0000.*","");
+            System.out.println(idTarjeta + "  <<<---- EL ID DE LA TARJETA");
             System.out.println("Leyendo bloque 1");
         } catch (Exception e) {
             e.printStackTrace();
@@ -337,6 +357,15 @@ public class Recargas extends javax.swing.JFrame {
         final Date date = new Date();
         Map body = new HashMap();
         float saldoActualizado = Float.parseFloat(saldoAgregar.getText()) + Float.parseFloat(saldoDisponible.getText()) + Float.parseFloat(saldoCortesia.getText());
+        try {
+            String res = CardReader.read((short) 1, sectores);
+            System.out.println(res + " <<--- RESPONSE");
+            if (res.length() > 0) {
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         body.put("saldo", saldoActualizado);
         body.put("saldocortesia", saldoCortesia.getText());
         body.put("fechaaltaLector", dateFormat.format(date));
@@ -346,17 +375,37 @@ public class Recargas extends javax.swing.JFrame {
         body.put("idMaquina", localMachine.getHostName());
         String saldoActualizadoString = Float.toString(saldoActualizado);
         System.out.println(saldoActualizadoString.length() + " <-- LA LONGITUD DEL STRING SALDO");
-        for (int i = saldoActualizadoString.length() - 1; i < 16; i++) {
+        for (int i = saldoActualizadoString.length() - 1; i < 15; i++) {
             saldoActualizadoString += " ";
+            //System.out.println(saldoActualizadoString.length() + " <---- LONGITUD EN LOOP");
         }
-        System.out.println();
+        //System.out.println(saldoActualizadoString.length() + " <------- La longitud del string a escribir");
         try {
-            //Consulta.sendPost("recarga", body);
-            String response = CardReader.write((short) 20, Float.toString(saldoActualizado), configuracionTarjeta);
-            System.out.println(response + " <-- RESPUESTA DE LA ESCRITURA");
-            String responseReader = CardReader.read((short) 20, configuracionTarjeta);
+            Map<Object,Object> respuesta = Consulta.sendPost("recargasaldo/", body);
+            System.out.println(respuesta + " <-------- LA RESPUESTA DEL SERVIDOR");
+            String response = CardReader.write((short) 20, saldoActualizadoString, sectores);
+            String responseReader = CardReader.read((short) 20, sectores);
             System.out.println(responseReader + " <-- LA RESPUESTA DE LA LECTURA");
-
+            //float saldoParaCortesia = Float.parseFloat(cortesiaField.getText());
+            //float saldoPagadoOperacion = Float.parseFloat(saldoAgregar.getText()) - Float.parseFloat(saldoCortesia.getText());
+            String saldoPagado = saldoAgregar.getText();
+            float recargaTotal = Float.parseFloat(saldoCortesia.getText()) + Float.parseFloat(saldoAgregar.getText());
+            String nombreUsuario = (String) ((Map<Object,Object>) userInformation.get("usuario")).get("nombre");
+            //System.out.println(userInformation + "   <<<------ EL NOMBRE DE USUARIO");
+            //Map<String, String> ticketData = new HashMap<>();
+            Map<String, String> ticketData = new HashMap<>();
+            ticketData.put("puntoexp", localMachine.getHostName());
+            ticketData.put("vendedor", nombreUsuario);
+            ticketData.put("idtarjeta", "---");
+            ticketData.put("tipotarjeta",  tipoTarjeta.getSelectedItem().toString());
+            ticketData.put("telefono", celular.getText());
+            ticketData.put("operacion", "RECARGA");
+            ticketData.put("saldoanterior", saldoDisponible.getText());
+            ticketData.put("saldopagado", saldoPagado);
+            ticketData.put("saldocortesia", saldoCortesia.getText());
+            ticketData.put("recargatotal", String.valueOf(recargaTotal));
+            new PrintTicket(ticketData);
+            cerrarTarjetaButtonActionPerformed();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -369,12 +418,12 @@ public class Recargas extends javax.swing.JFrame {
         }
         recargarTarjeta();
     }
-    private void cerrarTarjetaButtonActionPerformed(java.awt.event.ActionEvent evt) {
+    private void cerrarTarjetaButtonActionPerformed() {
         limpiarCampos();
         habilitaDesabilitaBotonesAgregarSaldo();
         leerTarjetaButton.setEnabled(true);
     }
-    private void agregarSaldoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_agregarSaldoButtonActionPerformed
+    private void agregarSaldoButtonActionPerformed() {//GEN-FIRST:event_agregarSaldoButtonActionPerformed
         JTextField recargarSaldoTextField = new javax.swing.JTextField();
         JTextField saldoCortesiaTextField = new javax.swing.JTextField();
         String[] opciones = {"Recargar", "Cancelar"};
@@ -428,7 +477,7 @@ public class Recargas extends javax.swing.JFrame {
         try {
             for (short i = 0; i < bloquesParaAccesar.length; i++) {
                 short bloque = bloquesParaAccesar[i];
-                String response = CardReader.read(bloque, configuracionTarjeta);
+                String response = CardReader.read(bloque, sectores);
                 //CardReader.write(bloque, "2299556644 Wendy", configuracionTarjeta);
                 //System.out.println("Reading block 12"); 20220407T013812Z
 

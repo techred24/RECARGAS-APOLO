@@ -23,11 +23,12 @@ public class CardReader {
         hexDigits[1] = Character.forDigit((num & 0xF), 16);
         return new String(hexDigits);
     }
-    public static String read (short bloque, Map<Object, Object> configuracionTarjeta) throws CardException {
+    public static String read (short bloque, ArrayList<Object> sectoresArgumento) throws CardException {
         final int sector = bloque / 4;
         //System.out.println(bloque%4 + " El bloque en el sector del 0 al 3");
         //System.out.println(bloque/4 + " El sector en el que se encuentra el bloque");
-        ArrayList<Object> sectores = (ArrayList<Object>) ((Map<Object, Object>) configuracionTarjeta.get("config")).get("sectores");
+        //ArrayList<Object> sectores = (ArrayList<Object>) ((Map<Object, Object>) configuracionTarjeta.get("config")).get("sectores");
+        ArrayList<Object> sectores = sectoresArgumento;
         Map<Object, Object> sectorMap = (Map<Object, Object>) sectores.get(sector);
         String keyString = (String) sectorMap.get("keyA");
         int len = keyString.length();
@@ -53,12 +54,13 @@ public class CardReader {
         return stringResponse;
         // Returns 2 bytes of array(63,00) for failure
     }
-    public static String write (short bloque, String newData, Map<Object, Object> configuracionTarjeta) throws CardException {
+    public static String write (short bloque, String newData, ArrayList<Object> sectoresArgumento) throws CardException {
         if (newData.length() != 16) {
             return "String must be 16 in length";
         }
         final int sector = bloque / 4;
-        ArrayList<Object> sectores = (ArrayList<Object>) ((Map<Object, Object>) configuracionTarjeta.get("config")).get("sectores");
+        //ArrayList<Object> sectores = (ArrayList<Object>) ((Map<Object, Object>) configuracionTarjeta.get("config")).get("sectores");
+        ArrayList<Object> sectores = sectoresArgumento;
         Map<Object, Object> sectorMap = (Map<Object, Object>) sectores.get(sector);
         String keyString = (String) sectorMap.get("keyB");
         int len = keyString.length();

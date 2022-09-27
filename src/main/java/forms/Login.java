@@ -124,7 +124,7 @@ public class Login extends javax.swing.JFrame {
             System.out.println((String) userData.get("token"));
             new Consulta((String) userData.get("token"));
             //System.out.println(userData.get("token") + "  <--- USER DATA");
-            Recargas recargas = new Recargas();
+            Recargas recargas = new Recargas(userData);
             Toolkit screen = Toolkit.getDefaultToolkit();
             Dimension screenSize = screen.getScreenSize();
             int screenWidth = screenSize.width;
