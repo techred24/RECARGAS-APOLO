@@ -366,7 +366,12 @@ public class Recargas extends javax.swing.JFrame {
         }
         String idUsuario = (String) ((Map<Object, Object>) userInformation.get("usuario")).get("_id");
         System.out.println(idUsuario + " ID USUARIO");
-        
+        Map body = new HashMap();
+        body.put("nombre", nombre.getText());
+        body.put("apellidos", apellidoPaterno.getText() + " " + apellidoMaterno.getText());
+        body.put("celular", celular.getText());
+        body.put("saldo", saldoAgregar.getText());
+        body.put("fechaaltaLector", )
     }
     private void  recargarTarjeta () {
         if (!verificarSaldos()) {
@@ -404,7 +409,7 @@ public class Recargas extends javax.swing.JFrame {
         final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         final Date date = new Date();
         Map body = new HashMap();
-        System.out.println(saldoCortesia.getText() + "  <<<<---------EL SALDO CORTESIA CUANDO SE GUARDA");
+        //System.out.println(saldoCortesia.getText() + "  <<<<---------EL SALDO CORTESIA CUANDO SE GUARDA");
         float saldoActualizado = Float.parseFloat(saldoAgregar.getText()) + Float.parseFloat(saldoDisponible.getText()) + Float.parseFloat(saldoCortesia.getText());
 
         body.put("saldo", saldoActualizado);
