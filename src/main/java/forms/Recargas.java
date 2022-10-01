@@ -38,6 +38,7 @@ public class Recargas extends javax.swing.JFrame {
     private String[] clavesTipoTarjeta;
     private int indiceClaveTipoTarjeta;
     private static String UID_Tarjeta = "";
+    //private static boolean tarjetaNueva = false;
     public Recargas(Map<Object,Object> userData) {
         this.setTitle("Apolo Recargas");
         userInformation = userData;
@@ -311,11 +312,67 @@ public class Recargas extends javax.swing.JFrame {
         guardarButton.setEnabled(!guardarButton.isEnabled());
         cerrarTarjetaButton.setEnabled(!cerrarTarjetaButton.isEnabled());
     }
+    private boolean verificarSaldos () {
+        final String numericRegeX = "^[0-9]+([.][0-9]+)?$";
+        final Pattern pattern = Pattern.compile(numericRegeX);
+        final Matcher agregarSaldoMatcher = pattern.matcher(saldoAgregar.getText());
+        if (saldoAgregar.getText().isBlank() || saldoAgregar.getText().equals("0")) {
+            JOptionPane.showMessageDialog(null, "NO SE HA AGREGADO SALDO A LA TARJETA");
+            return false;
+        }
+        if (!agregarSaldoMatcher.matches()) {
+            JOptionPane.showMessageDialog(null, "SALDO A AGREGAR NO VALIDO");
+            return false;
+        }
+        if (saldoCortesia.getText().isBlank()) {
+            saldoCortesia.setText("0");
+        }
+        return true;
+    }
     private void activarTarjeta () {
-
+        System.out.println("GUARDANDO TARJETA NUEVA");
+        if (nombre.getText().isBlank() || apellidoPaterno.getText().isBlank() || apellidoMaterno.getText().isBlank() || celular.getText().isBlank()) {
+            JOptionPane.showMessageDialog(null, "FALTA COMPLETAR CAMPOS");
+            return;
+        }
+        if (!verificarSaldos()) {
+            return;
+        }
+        String regexTelefono = "[0-9*#+() -]*";
+        Pattern pattern = Pattern.compile(regexTelefono);
+        Matcher matcher = pattern.matcher(celular.getText());
+        if (!matcher.matches()) {
+            JOptionPane.showMessageDialog(null, "El numero de celular no es valido");
+        }
+        /*final String numericRegeX = "^[0-9]+([.][0-9]+)?$";
+        final Pattern pattern = Pattern.compile(numericRegeX);
+        final Matcher agregarSaldoMatcher = pattern.matcher(saldoAgregar.getText());
+        if (saldoAgregar.getText().isBlank() || saldoAgregar.getText().equals("0")) {
+            JOptionPane.showMessageDialog(null, "NO SE HA AGREGADO SALDO A LA TARJETA");
+            return;
+        }
+        if (!agregarSaldoMatcher.matches()) {
+            JOptionPane.showMessageDialog(null, "SALDO A AGREGAR NO VALIDO");
+            return;
+        }
+        if (saldoCortesia.getText().isBlank()) {
+            saldoCortesia.setText("0");
+        }*/
+        InetAddress localMachine = null;
+        try {
+            localMachine = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        String idUsuario = (String) ((Map<Object, Object>) userInformation.get("usuario")).get("_id");
+        System.out.println(idUsuario + " ID USUARIO");
+        
     }
     private void  recargarTarjeta () {
-        final String numericRegeX = "^[0-9]+([.][0-9]+)?$";
+        if (!verificarSaldos()) {
+            return;
+        }
+        /*final String numericRegeX = "^[0-9]+([.][0-9]+)?$";
         final Pattern pattern = Pattern.compile(numericRegeX);
         final Matcher agregarSaldoMatcher = pattern.matcher(saldoAgregar.getText());
         //final Matcher cortesiaSaldoMatcher = pattern.matcher(saldoCortesia.getText());
@@ -329,7 +386,7 @@ public class Recargas extends javax.swing.JFrame {
         }
         if (saldoCortesia.getText().isBlank()) {
             saldoCortesia.setText("0");
-        }
+        }*/
         InetAddress localMachine = null;
         try {
             localMachine = InetAddress.getLocalHost();
@@ -347,6 +404,7 @@ public class Recargas extends javax.swing.JFrame {
         final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         final Date date = new Date();
         Map body = new HashMap();
+        System.out.println(saldoCortesia.getText() + "  <<<<---------EL SALDO CORTESIA CUANDO SE GUARDA");
         float saldoActualizado = Float.parseFloat(saldoAgregar.getText()) + Float.parseFloat(saldoDisponible.getText()) + Float.parseFloat(saldoCortesia.getText());
 
         body.put("saldo", saldoActualizado);
@@ -389,7 +447,7 @@ public class Recargas extends javax.swing.JFrame {
             ticketData.put("saldopagado", saldoPagado);
             ticketData.put("saldocortesia", saldoCortesiaImpresion);
             ticketData.put("recargatotal", String.valueOf(recargaTotal));
-            new PrintTicket(ticketData);
+            //new PrintTicket(ticketData);
             cerrarTarjetaButtonActionPerformed();
         } catch (Exception e) {
             e.printStackTrace();
@@ -403,7 +461,16 @@ public class Recargas extends javax.swing.JFrame {
         }
         recargarTarjeta();
     }
+    private void bloquearCampos() {
+        nombre.setEnabled(false);
+        apellidoPaterno.setEnabled(false);
+        apellidoMaterno.setEnabled(false);
+        celular.setEnabled(false);
+        folio.setEnabled(false);
+        tipoTarjeta.setEnabled(false);
+    }
     private void cerrarTarjetaButtonActionPerformed() {
+        bloquearCampos();
         limpiarCampos();
         habilitaDesabilitaBotonesAgregarSaldo();
         leerTarjetaButton.setEnabled(true);
@@ -411,7 +478,7 @@ public class Recargas extends javax.swing.JFrame {
     private void agregarSaldoButtonActionPerformed() {//GEN-FIRST:event_agregarSaldoButtonActionPerformed
         JTextField recargarSaldoTextField = new javax.swing.JTextField();
         JTextField saldoCortesiaTextField = new javax.swing.JTextField();
-        String[] opciones = {"Recargar", "Cancelar"};
+        //String[] opciones = {"Recargar", "Cancelar"};
         JPanel basePanel = new JPanel();
         basePanel.setOpaque(true);
 
@@ -463,8 +530,31 @@ public class Recargas extends javax.swing.JFrame {
         idTarjeta = idTarjeta.replaceAll("\u0000.*","");
         return idTarjeta;
     }
+    private boolean leerSiTarjetaNueva () throws CardException {
+        String sectorResponse = CardReader.read((short) 5,sectores);
+        if (sectorResponse.length() <= 15) {
+            return true;
+        }
+        return false;
+    }
+    private void activarCamposTarjetaNueva () {
+        nombre.setEnabled(true);
+        apellidoPaterno.setEnabled(true);
+        apellidoMaterno.setEnabled(true);
+        celular.setEnabled(true);
+        folio.setEnabled(true);
+        this.tipoTarjeta.setModel(new DefaultComboBoxModel<>(this.tiposTarjeta));
+        tipoTarjeta.setEnabled(true);
+        leerTarjetaButton.setEnabled(false);
+        habilitaDesabilitaBotonesAgregarSaldo();
+    }
     private void leerTarjetaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_leerTarjetaButtonActionPerformed
         try {
+            if (leerSiTarjetaNueva()) {
+                activarCamposTarjetaNueva();
+                //tarjetaNueva = true;
+                return;
+            }
             String idTarjeta = consigueIdTarjeta();
             Map<Object, Object> response = Consulta.sendGet("tarjeta/getIdFabrica/" + idTarjeta);
             System.out.println(response + " <<<----- LA RESPUESTA DEL SERVIDOR");
