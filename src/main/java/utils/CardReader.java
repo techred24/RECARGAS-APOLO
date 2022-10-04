@@ -23,6 +23,46 @@ public class CardReader {
         hexDigits[1] = Character.forDigit((num & 0xF), 16);
         return new String(hexDigits);
     }
+    public static String readBlockZeroFirstTime (int bloque, ArrayList<Object> sectoresArgumento) throws CardException {
+        final int sector = bloque / 4;
+        ArrayList<Object> sectores = sectoresArgumento;
+        Map<Object, Object> sectorMap = (Map<Object, Object>) sectores.get(sector);
+        String keyString = (String) sectorMap.get("keyAold");
+        int len = keyString.length();
+        byte[] authKeyData = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            authKeyData[i / 2] = (byte) ((Character.digit(keyString.charAt(i), 16) << 4)
+                    + Character.digit(keyString.charAt(i+1), 16));
+        }
+        reader.connectReader();
+        reader.connectCard(null);
+        byte[] UID = reader.getUID();
+        StringBuffer hexStringBuffer = new StringBuffer();
+        for (short j = 0; j < UID.length; j++) {
+            hexStringBuffer.append(byteToHex(UID[j]));
+        }
+        byte[] UID2 = reader.readCardUsingDefaultKey(0);
+        StringBuffer hexStringBuffer2 = new StringBuffer();
+        for (short j = 0; j < UID2.length; j++) {
+            hexStringBuffer2.append(byteToHex(UID2[j]));
+        }
+        System.out.println(hexStringBuffer2.toString() + " <<<<<<<<<<----- LEYENDO BLOQUE CERO USANDO LLAVE POR DEFECTO");
+        System.out.println(hexStringBuffer.toString() + "  <<<<<<<<<<------ UID SECTOR 0");
+        return hexStringBuffer.toString();
+        /*byte[] response = reader.readCardBlock(authKeyData, readerUtil.getAuthCmdForkeyA(), (int) bloque);
+        if (bloque == 0) {
+            StringBuffer hexStringBuffer = new StringBuffer();
+            for (short j = 0; j < response.length; j++) {
+                hexStringBuffer.append(byteToHex(response[j]));
+            }
+            //System.out.println(hexStringBuffer.toString().substring(2, 32));
+            //System.out.println(hexStringBuffer.toString().substring(2, 32).length());
+            return hexStringBuffer.toString().substring(2, 32);
+        }
+        String stringResponse = new String(response);*/
+        /*System.out.println(new String(response, StandardCharsets.UTF_8));*/
+        //return stringResponse;
+    }
     public static String read (short bloque, ArrayList<Object> sectoresArgumento) throws CardException {
         final int sector = bloque / 4;
         //System.out.println(bloque%4 + " El bloque en el sector del 0 al 3");
@@ -40,7 +80,7 @@ public class CardReader {
         reader.connectReader();
         reader.connectCard(null);
         byte[] response = reader.readCardBlock(authKeyData, readerUtil.getAuthCmdForkeyA(), (int) bloque);
-        if (bloque == 0) {
+        /*if (bloque == 0) {
             StringBuffer hexStringBuffer = new StringBuffer();
             for (short j = 0; j < response.length; j++) {
                 hexStringBuffer.append(byteToHex(response[j]));
@@ -48,7 +88,7 @@ public class CardReader {
             //System.out.println(hexStringBuffer.toString().substring(2, 32));
             //System.out.println(hexStringBuffer.toString().substring(2, 32).length());
             return hexStringBuffer.toString().substring(2, 32);
-        }
+        }*/
         String stringResponse = new String(response);
         /*System.out.println(new String(response, StandardCharsets.UTF_8));*/
         return stringResponse;

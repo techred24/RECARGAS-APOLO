@@ -36,6 +36,7 @@ public class Recargas extends javax.swing.JFrame {
     private ArrayList<Object> sectores;
     private String[] tiposTarjeta;
     private String[] clavesTipoTarjeta;
+    private int[] diasUtiles;
     private int indiceClaveTipoTarjeta;
     private static String UID_Tarjeta = "";
     //private static boolean tarjetaNueva = false;
@@ -62,17 +63,19 @@ public class Recargas extends javax.swing.JFrame {
             configuracionTarjeta = (Map<Object, Object>) dataConfiguracionTarjeta.get("data");
             //System.out.println(configuracionTarjeta + " <------ CONFIGURACION TARJETA");
             sectores = (ArrayList<Object>) configuracionTarjeta.get("sectores");
-            //System.out.println(configuracionTarjeta.get("subsidios"));
+            System.out.println(configuracionTarjeta.get("subsidios") + " <<<<<----------SUBSIDIOS");
 
             List subsidios = (List) configuracionTarjeta.get("subsidios");
             //System.out.println(subsidios + " <------- SUBSIDIOS");
             tiposTarjeta = new String[subsidios.size()];
             clavesTipoTarjeta = new String[subsidios.size()];
+            diasUtiles = new int[subsidios.size()];
             //System.out.println(subsidios.size());
             //System.out.println("TAMANIO DE LA LISTA DE SUBSIDIOS");
             for (short i = 0; i < subsidios.size(); i++) {
                 tiposTarjeta[i] =(String) ((Map<Object, Object>) subsidios.get(i)).get("nombre");
                 clavesTipoTarjeta[i] = (String) ((Map<Object, Object>) subsidios.get(i)).get("clave");
+                diasUtiles[i] = (int) ((Map<Object, Object>) subsidios.get(i)).get("diasUtiles");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -329,6 +332,14 @@ public class Recargas extends javax.swing.JFrame {
         }
         return true;
     }
+    private String getFechaVencimientoSubsidio (int diasUtiles) {
+        final TimeZone timeZone = TimeZone.getTimeZone("UTC");
+        final DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        dateFormat.setTimeZone(timeZone);
+        final Date date = new Date();
+        date.setHours(diasUtiles*24);
+        return dateFormat.format(date);
+    }
     private void activarTarjeta () {
         System.out.println("GUARDANDO TARJETA NUEVA");
         if (nombre.getText().isBlank() || apellidoPaterno.getText().isBlank() || apellidoMaterno.getText().isBlank() || celular.getText().isBlank()) {
@@ -344,34 +355,44 @@ public class Recargas extends javax.swing.JFrame {
         if (!matcher.matches()) {
             JOptionPane.showMessageDialog(null, "El numero de celular no es valido");
         }
-        /*final String numericRegeX = "^[0-9]+([.][0-9]+)?$";
-        final Pattern pattern = Pattern.compile(numericRegeX);
-        final Matcher agregarSaldoMatcher = pattern.matcher(saldoAgregar.getText());
-        if (saldoAgregar.getText().isBlank() || saldoAgregar.getText().equals("0")) {
-            JOptionPane.showMessageDialog(null, "NO SE HA AGREGADO SALDO A LA TARJETA");
-            return;
-        }
-        if (!agregarSaldoMatcher.matches()) {
-            JOptionPane.showMessageDialog(null, "SALDO A AGREGAR NO VALIDO");
-            return;
-        }
-        if (saldoCortesia.getText().isBlank()) {
-            saldoCortesia.setText("0");
-        }*/
         InetAddress localMachine = null;
         try {
             localMachine = InetAddress.getLocalHost();
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
+        final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        final Date date = new Date();
         String idUsuario = (String) ((Map<Object, Object>) userInformation.get("usuario")).get("_id");
         System.out.println(idUsuario + " ID USUARIO");
+        String claveSubsidio = clavesTipoTarjeta[tipoTarjeta.getSelectedIndex()];
+        int diasUtilesSubsidio = diasUtiles[tipoTarjeta.getSelectedIndex()];
+        String idFabrica = "";
+        try {
+            idFabrica = CardReader.readBlockZeroFirstTime( 0, sectores);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(idFabrica + "  <<<<<<----------- ID FABRICA COMPLETO");
+        System.out.println(idFabrica.substring(0,8) + "  <<<<<<----------- ID FABRICA SUBSTRING");
+        System.out.println(diasUtiles[tipoTarjeta.getSelectedIndex()] + "  <<<<<<----------- DIAS UTILES");
+        System.out.println(claveSubsidio + " <<<<<------------- CLAVE SUBSIDIO");
+        System.out.println(tipoTarjeta.getSelectedIndex() + " <<<<<------------- INDICE TIPO TARJETA");
+        System.out.println(tipoTarjeta.getSelectedItem() + "<<<<<<-------------- ITEM SELECCIONADO DE TIPO TARJETA");
         Map body = new HashMap();
         body.put("nombre", nombre.getText());
         body.put("apellidos", apellidoPaterno.getText() + " " + apellidoMaterno.getText());
         body.put("celular", celular.getText());
         body.put("saldo", saldoAgregar.getText());
-        body.put("fechaaltaLector", )
+        body.put("fechaaltaLector", dateFormat.format(date));
+        body.put("usuarioalta", idUsuario);
+        body.put("usuarioPc", System.getProperty("user.name"));
+        body.put("claveSub", claveSubsidio);
+        body.put("idFabrica", "Bloque 0, guardarlos 8 primeros cáracteres: .substring(0,8)");
+        if (diasUtilesSubsidio  > 0) {
+            body.put("fechaVencimiento", getFechaVencimientoSubsidio(diasUtilesSubsidio));
+        }
+        body.put("idMaquina", localMachine.getHostName());
     }
     private void  recargarTarjeta () {
         if (!verificarSaldos()) {
@@ -537,6 +558,7 @@ public class Recargas extends javax.swing.JFrame {
     }
     private boolean leerSiTarjetaNueva () throws CardException {
         String sectorResponse = CardReader.read((short) 5,sectores);
+        sectorResponse = sectorResponse.replaceAll("\u0000.*","");
         if (sectorResponse.length() <= 15) {
             return true;
         }
@@ -649,6 +671,14 @@ public class Recargas extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 //new Recargas().setVisible(true);
+                JFrame login = new Login();
+                login.setVisible(true);
+                //System.out.println(login.getSize());
+                Toolkit screen = Toolkit.getDefaultToolkit();
+                Dimension screenSize = screen.getScreenSize();
+                int screenHeight = screenSize.height;
+                int screenWidth = screenSize.width;
+                login.setLocation((screenWidth-login.getSize().width)/2, (screenHeight-login.getSize().height)/2);
             }
         });
     }
