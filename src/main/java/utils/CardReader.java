@@ -80,15 +80,18 @@ public class CardReader {
         reader.connectReader();
         reader.connectCard(null);
         byte[] response = reader.readCardBlock(authKeyData, readerUtil.getAuthCmdForkeyA(), (int) bloque);
-        /*if (bloque == 0) {
+        if (bloque == 0) {
+            byte[] UID = reader.getUID();
             StringBuffer hexStringBuffer = new StringBuffer();
-            for (short j = 0; j < response.length; j++) {
-                hexStringBuffer.append(byteToHex(response[j]));
+            for (short j = 0; j < UID.length; j++) {
+                hexStringBuffer.append(byteToHex(UID[j]));
             }
             //System.out.println(hexStringBuffer.toString().substring(2, 32));
             //System.out.println(hexStringBuffer.toString().substring(2, 32).length());
-            return hexStringBuffer.toString().substring(2, 32);
-        }*/
+            //return hexStringBuffer.toString().substring(2, 32);
+            System.out.println(hexStringBuffer.toString() + "  <<<<<------ ID FABRICA O UID");
+            return hexStringBuffer.toString();
+        }
         String stringResponse = new String(response);
         /*System.out.println(new String(response, StandardCharsets.UTF_8));*/
         return stringResponse;

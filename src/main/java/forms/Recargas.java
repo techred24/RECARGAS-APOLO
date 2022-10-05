@@ -375,6 +375,7 @@ public class Recargas extends javax.swing.JFrame {
         }
         System.out.println(idFabrica + "  <<<<<<----------- ID FABRICA COMPLETO");
         System.out.println(idFabrica.substring(0,8) + "  <<<<<<----------- ID FABRICA SUBSTRING");
+        idFabrica = idFabrica.substring(0,8);
         System.out.println(diasUtiles[tipoTarjeta.getSelectedIndex()] + "  <<<<<<----------- DIAS UTILES");
         System.out.println(claveSubsidio + " <<<<<------------- CLAVE SUBSIDIO");
         System.out.println(tipoTarjeta.getSelectedIndex() + " <<<<<------------- INDICE TIPO TARJETA");
@@ -388,11 +389,93 @@ public class Recargas extends javax.swing.JFrame {
         body.put("usuarioalta", idUsuario);
         body.put("usuarioPc", System.getProperty("user.name"));
         body.put("claveSub", claveSubsidio);
-        body.put("idFabrica", "Bloque 0, guardarlos 8 primeros cáracteres: .substring(0,8)");
+        body.put("idFabrica", idFabrica);
+        if (!folio.getText().isBlank()) {
+            body.put("folio", folio.getText().trim());
+        }
         if (diasUtilesSubsidio  > 0) {
             body.put("fechaVencimiento", getFechaVencimientoSubsidio(diasUtilesSubsidio));
         }
         body.put("idMaquina", localMachine.getHostName());
+        Map<Object, Object> respuesta = new HashMap<>();
+        String folioTarjeta = "";
+        try {
+            respuesta =  Consulta.sendPost("tarjeta", body);
+            System.out.println(respuesta + " LA RESPUESTA DESPUES DE GUARDAR LA TARJETA EN EL SERVIDOR");
+            System.out.println(respuesta.get("data") + " LA RESPUESTA DESPUES DE GUARDAR LA TARJETA EN EL SERVIDOR");
+            Map <Object, Object> data = (Map<Object, Object>) respuesta.get("data");
+            Map <Object,Object> dataWithInfo = (Map<Object, Object>) data.get("data");
+            folioTarjeta = String.valueOf(dataWithInfo.get("folio"));
+            System.out.println(folioTarjeta + "EL FOLIO QUE LLEGA DESDE EL SERVIDOR");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if ((short) respuesta.get("code") != 200) {
+            JOptionPane.showMessageDialog(null,"Error al enviar los datos al servidor");
+            cerrarTarjetaButtonActionPerformed();
+            return;
+        }
+
+
+        /*
+        String hostname = localMachine.getHostName();
+        try {
+            if (localMachine.getHostName().length() > 16) {
+                CardReader.write((short) 4,hostname.substring(0,16), sectores);
+            } else {
+                for (int i = hostname.length() - 1; i < 15; i++) {
+                    hostname += " ";
+                }
+                CardReader.write((short) 4,hostname, sectores);
+            }
+
+            final DateFormat dateFormatISO = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+            final Date dateISO = new Date();
+            String nowISOReduce = dateFormatISO.format(dateISO);
+            if (nowISOReduce.length() > 16) {
+                CardReader.write((short) 5,nowISOReduce.substring(0,16), sectores);
+            } else {
+                for (int i = nowISOReduce.length() - 1; i < 15; i++) {
+                    nowISOReduce += " ";
+                }
+                CardReader.write((short) 5,nowISOReduce, sectores);
+            }
+
+            String usuarioPC = System.getProperty("user.name");
+            if (usuarioPC.length() > 16) {
+                CardReader.write((short) 6,usuarioPC.substring(0,16), sectores);
+            } else {
+                for (int i = usuarioPC.length() - 1; i < 15; i++) {
+                    usuarioPC += " ";
+                }
+                CardReader.write((short) 6,usuarioPC, sectores);
+            }
+
+            CardReader.write((short) 8,idUsuario.substring(0,16), sectores);
+            String segundaParteIdUsuario = idUsuario.substring(16, idUsuario.length());
+            if (segundaParteIdUsuario.length() > 16) {
+                CardReader.write((short) 9,segundaParteIdUsuario.substring(0,16), sectores);
+            } else {
+                for (int i = segundaParteIdUsuario.length() - 1; i < 15; i++) {
+                    segundaParteIdUsuario += " ";
+                }
+                CardReader.write((short) 9,segundaParteIdUsuario, sectores);
+            }
+            CardReader.write((short) 10,"FOLIO", sectores);
+
+
+
+
+            //System.out.println(CardReader.read((short)4,sectores).replaceAll("\u0000.*",""));
+            //System.out.println(CardReader.read((short)5,sectores).replaceAll("\u0000.*",""));
+            //System.out.println(CardReader.read((short)6,sectores).replaceAll("\u0000.*",""));
+            //System.out.println(CardReader.read((short)8,sectores).replaceAll("\u0000.*",""));
+            //System.out.println(CardReader.read((short)9,sectores).replaceAll("\u0000.*",""));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+
+
     }
     private void  recargarTarjeta () {
         if (!verificarSaldos()) {
@@ -481,7 +564,7 @@ public class Recargas extends javax.swing.JFrame {
     }
     private void guardarButtonActionPerformed (java.awt.event.ActionEvent evt) {
         System.out.println(nombre.isEnabled() + " <- Text Field nombre habilitado, tarjeta nueva");
-        if (nombre.isEnabled()) {
+        if (!nombre.isEnabled()) {
             activarTarjeta();
             return;
         }
