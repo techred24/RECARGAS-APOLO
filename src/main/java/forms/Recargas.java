@@ -333,6 +333,9 @@ public class Recargas extends javax.swing.JFrame {
         return true;
     }
     private String getFechaVencimientoSubsidio (int diasUtiles) {
+        if (diasUtiles == 0) {
+            return "00000000";
+        }
         final TimeZone timeZone = TimeZone.getTimeZone("UTC");
         final DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         dateFormat.setTimeZone(timeZone);
@@ -399,25 +402,94 @@ public class Recargas extends javax.swing.JFrame {
         body.put("idMaquina", localMachine.getHostName());
         Map<Object, Object> respuesta = new HashMap<>();
         String folioTarjeta = "";
+        String idTarjeta = "";
         try {
             respuesta =  Consulta.sendPost("tarjeta", body);
-            System.out.println(respuesta + " LA RESPUESTA DESPUES DE GUARDAR LA TARJETA EN EL SERVIDOR");
-            System.out.println(respuesta.get("data") + " LA RESPUESTA DESPUES DE GUARDAR LA TARJETA EN EL SERVIDOR");
+            //System.out.println(respuesta + " LA RESPUESTA DESPUES DE GUARDAR LA TARJETA EN EL SERVIDOR");
+            //System.out.println(respuesta.get("data") + " LA RESPUESTA DESPUES DE GUARDAR LA TARJETA EN EL SERVIDOR");
             Map <Object, Object> data = (Map<Object, Object>) respuesta.get("data");
             Map <Object,Object> dataWithInfo = (Map<Object, Object>) data.get("data");
             folioTarjeta = String.valueOf(dataWithInfo.get("folio"));
-            System.out.println(folioTarjeta + "EL FOLIO QUE LLEGA DESDE EL SERVIDOR");
+            idTarjeta = String.valueOf(dataWithInfo.get("id"));
+            System.out.println(folioTarjeta + "      <<<--- EL FOLIO QUE LLEGA DESDE EL SERVIDOR");
+            System.out.println(idTarjeta + "  <<<---- EL ID DE LA TARJETA QUE MANDA EL SERVIDOR");
         } catch (Exception e) {
             e.printStackTrace();
         }
         if ((short) respuesta.get("code") != 200) {
             JOptionPane.showMessageDialog(null,"Error al enviar los datos al servidor");
             cerrarTarjetaButtonActionPerformed();
+
             return;
         }
+        /*String informacionUsuario = celular.getText() + " " + nombre.getText() + " " + apellidoPaterno.getText() + " " + apellidoMaterno.getText();
+        System.out.println(informacionUsuario + "   <<<<------ INFORMACION DE USUARIO PA GUARDAR");
+        String infoUser1 = "";
+        String infoUser2 = "";
+        String infoUser3 = "";
+        //System.out.println(informacionUsuario.length() % 16);
+        if (informacionUsuario.length() <= 32) {
+            infoUser1 = informacionUsuario.substring(0,16);
+            infoUser2 = informacionUsuario.substring(16);
+
+            for (int i = infoUser2.length() - 1; i < 15; i++) {
+                infoUser2 += " ";
+            }
+        } else {
+            infoUser1 = informacionUsuario.substring(0,16);
+            infoUser2 = informacionUsuario.substring(16,32);
+            infoUser3 = informacionUsuario.substring(32);
+
+            for (int i = infoUser3.length() - 1; i < 15; i++) {
+                infoUser3 += " ";
+            }
+        }
+        System.out.println(infoUser1 + " <<--1");
+        System.out.println(infoUser2 + " <<--2");
+        System.out.println(infoUser3 + " <<--3");
+
+        System.out.println(infoUser1.length() + " <<--1 LENGTH");
+        System.out.println(infoUser2.length() + " <<--2 LENGTH");
+        System.out.println(infoUser3.length() + " <<--3 LENGTH");*/
+
+        /*System.out.println(saldoAgregar.getText() + " <<<--- SALDO PA AGREGAR");
+        System.out.println(saldoCortesia.getText() + " <<<--- SALDO CORTESIA");
+
+        float saldoParaAgregar = Float.parseFloat(saldoAgregar.getText());
+        float saldoParaCotesia = Float.parseFloat(saldoCortesia.getText());
+
+        float saldoTotal = saldoParaAgregar + saldoParaCotesia;
+        System.out.println(saldoTotal + " <<<-- SALDO TOTAL A ESCRIBIR EN LA TARJETA. SALDO + CORTESIA");
+        String saldoEscribir = String.valueOf(saldoTotal);
+        for (int i = saldoEscribir.length() - 1; i < 15; i++) {
+            saldoEscribir += " ";
+        }
+        System.out.println(saldoEscribir + " <<<<----- EL SALDO A ESCRIBIR EN TARJETA");
+        System.out.println(saldoEscribir.length() + "  <<<<< LA LONGITUD DEL SALDO A ESCRIBIR");*/
+
+        //indiceClaveTipoTarjeta = Arrays.asList(clavesTipoTarjeta).indexOf(response);
+        //this.tipoTarjeta.setSelectedIndex(indiceClaveTipoTarjeta);
+
+        /*String tipoTarjetaFechaEscribir = clavesTipoTarjeta[tipoTarjeta.getSelectedIndex()] + getFechaVencimientoSubsidio(diasUtilesSubsidio);
+        for (int i = tipoTarjetaFechaEscribir.length() - 1; i < 15;i++) {
+            tipoTarjetaFechaEscribir += " ";
+        }
+        System.out.println(tipoTarjetaFechaEscribir + " <<< TIPO TARJETA Y FECHA");
+        System.out.println(tipoTarjetaFechaEscribir.length() + " <<< LONGITUD TIPO TARJETA Y FECHA");*/
+
+        /*String id1 = idTarjeta.substring(0,16);
+        String id2 = idTarjeta.substring(16);
+
+        for (int i = id2.length() - 1; i < 15; i++) {
+            id2 += " ";
+        }*/
 
 
-        /*
+
+
+
+
+
         String hostname = localMachine.getHostName();
         try {
             if (localMachine.getHostName().length() > 16) {
@@ -461,8 +533,72 @@ public class Recargas extends javax.swing.JFrame {
                 }
                 CardReader.write((short) 9,segundaParteIdUsuario, sectores);
             }
-            CardReader.write((short) 10,"FOLIO", sectores);
 
+
+            for (int i = folioTarjeta.length() - 1; i < 15; i++) {
+                folioTarjeta += " ";
+            }
+            CardReader.write((short) 10,folioTarjeta, sectores);
+
+
+            String informacionUsuario = celular.getText() + " " + nombre.getText() + " " + apellidoPaterno.getText() + " " + apellidoMaterno.getText();
+            String infoUser1 = "";
+            String infoUser2 = "";
+            String infoUser3 = "";
+            if (informacionUsuario.length() <= 32) {
+                infoUser1 = informacionUsuario.substring(0,16);
+                infoUser2 = informacionUsuario.substring(16);
+
+                for (int i = infoUser2.length() - 1; i < 15; i++) {
+                    infoUser2 += " ";
+                }
+                CardReader.write((short) 12,infoUser1,sectores);
+                CardReader.write((short) 13,infoUser2,sectores);
+            } else {
+                infoUser1 = informacionUsuario.substring(0,16);
+                infoUser2 = informacionUsuario.substring(16,32);
+                infoUser3 = informacionUsuario.substring(32);
+
+                for (int i = infoUser3.length() - 1; i < 15; i++) {
+                    infoUser3 += " ";
+                }
+                CardReader.write((short) 12,infoUser1,sectores);
+                CardReader.write((short) 13,infoUser2,sectores);
+                CardReader.write((short) 14,infoUser3,sectores);
+            }
+
+
+
+
+            float saldoParaAgregar = Float.parseFloat(saldoAgregar.getText());
+            float saldoParaCotesia = Float.parseFloat(saldoCortesia.getText());
+
+            float saldoTotal = saldoParaAgregar + saldoParaCotesia;
+            System.out.println(saldoTotal + " <<<-- SALDO TOTAL A ESCRIBIR EN LA TARJETA. SALDO + CORTESIA");
+            String saldoEscribir = String.valueOf(saldoTotal);
+            for (int i = saldoEscribir.length() - 1; i < 15; i++) {
+                saldoEscribir += " ";
+            }
+            CardReader.write((short) 20, saldoEscribir,sectores);
+
+
+            String claveSubsidioFechaEscribir = clavesTipoTarjeta[tipoTarjeta.getSelectedIndex()] + getFechaVencimientoSubsidio(diasUtilesSubsidio);
+            for (int i = claveSubsidioFechaEscribir.length() - 1; i < 15;i++) {
+                claveSubsidioFechaEscribir += " ";
+            }
+            CardReader.write((short) 16,claveSubsidioFechaEscribir,sectores);
+
+
+
+
+            String id1 = idTarjeta.substring(0,16);
+            String id2 = idTarjeta.substring(16);
+
+            for (int i = id2.length() - 1; i < 15; i++) {
+                id2 += " ";
+            }
+            CardReader.write((short) 1,id1,sectores);
+            CardReader.write((short) 2,id2,sectores);
 
 
 
@@ -473,7 +609,7 @@ public class Recargas extends javax.swing.JFrame {
             //System.out.println(CardReader.read((short)9,sectores).replaceAll("\u0000.*",""));
         } catch (Exception e) {
             e.printStackTrace();
-        }*/
+        }
 
 
     }
