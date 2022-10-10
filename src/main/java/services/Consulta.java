@@ -20,6 +20,9 @@ public class Consulta {
     //private static String api = "https://demo.bustrack.mx/apsmg/api/";
     private static String api = "http://localhost:4000/api/";
     private static String token = "";
+    public Consulta (String url, boolean bol) {
+        api = url;
+    }
     public Consulta (String token) {
         this.token = token;
     }

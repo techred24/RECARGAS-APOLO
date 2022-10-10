@@ -86,11 +86,7 @@ public class CardReader {
             for (short j = 0; j < UID.length; j++) {
                 hexStringBuffer.append(byteToHex(UID[j]));
             }
-            //System.out.println(hexStringBuffer.toString().substring(2, 32));
-            //System.out.println(hexStringBuffer.toString().substring(2, 32).length());
-            //return hexStringBuffer.toString().substring(2, 32);
-            System.out.println(hexStringBuffer.toString() + "  <<<<<------ ID FABRICA O UID");
-            return hexStringBuffer.toString();
+            return hexStringBuffer.toString().substring(0,8);
         }
         String stringResponse = new String(response);
         /*System.out.println(new String(response, StandardCharsets.UTF_8));*/
