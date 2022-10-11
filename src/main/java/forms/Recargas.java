@@ -412,21 +412,15 @@ public class Recargas extends javax.swing.JFrame {
         if ((short) respuesta.get("code") != 200) {
             JOptionPane.showMessageDialog(null,"Error al enviar los datos al servidor");
             cerrarTarjetaButtonActionPerformed();
-
             return;
         }
 
 
 
-
-
-
-
-
-
-
         String hostname = localMachine.getHostName();
         try {
+            CardReader.reassignAllSectorKeys(sectores);
+            System.out.println("Se reasignaron sectores");
             /*if (localMachine.getHostName().length() > 16) {
                 CardReader.write((short) 4,hostname.substring(0,16), sectores);
             } else {
@@ -564,7 +558,7 @@ public class Recargas extends javax.swing.JFrame {
             ticketData.put("saldopagado", saldoPagado);
             ticketData.put("saldocortesia", saldoCortesiaImpresion);
             ticketData.put("recargatotal", String.valueOf(recargaTotal));
-            new PrintTicket(ticketData);
+            //new PrintTicket(ticketData);
 
         } catch (Exception e) {
             e.printStackTrace();
